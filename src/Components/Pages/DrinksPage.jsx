@@ -237,7 +237,7 @@ const DrinksPage = () => {
 
     const filteredProducts = products.filter(product => {
         // Compare using category ObjectId (handle both string and object)
-        const productCategoryId = typeof product.category === 'object' ? product.category : product.category._id;
+        const productCategoryId = typeof product.category === 'object' ? product.category._id : product.category;
         const matchesCategory = selectedCategory ? productCategoryId === selectedCategory : true;
         const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
         return matchesCategory && matchesSearch;
