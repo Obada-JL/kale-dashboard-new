@@ -200,7 +200,7 @@ export default function Login() {
                 </form>
 
                 {/* Security Notice */}
-                <div className="mt-4 p-3 rounded-4" style={{ backgroundColor: 'rgba(13, 110, 253, 0.05)' }}>
+                <div className="mt-4 p-3 rounded-3" style={{ backgroundColor: 'rgba(13, 110, 253, 0.05)' }}>
                   <div className="d-flex align-items-center">
                     <div className="bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center me-3"
                       style={{ width: '40px', height: '40px', minWidth: '40px' }}>

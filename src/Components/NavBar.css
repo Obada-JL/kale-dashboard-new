@@ -1,19 +1,24 @@
+/* ===========================
+   NavBar — Kale Cafe Brand
+   =========================== */
+
 .navbar__links > a {
   text-decoration: none;
-  color: black;
+  color: var(--bs-kale-brown-dark, #4A2E1A);
 }
 
 .navbar {
-  border-radius: 15px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(107, 66, 38, 0.08);
   margin-bottom: 20px;
-  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-  border: 1px solid rgba(0, 0, 0, 0.05);
+  background: rgba(255, 255, 255, 0.97) !important;
+  border: 1px solid rgba(107, 66, 38, 0.06);
+  backdrop-filter: blur(8px);
 }
 
 .navbar__logo {
   transition: transform 0.3s ease;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+  filter: drop-shadow(0 2px 4px rgba(107, 66, 38, 0.1));
 }
 
 .navbar__logo:hover {
@@ -31,13 +36,13 @@
 }
 
 .navbar-nav .nav-link {
-  color: #333;
+  color: var(--bs-kale-brown-dark, #4A2E1A);
   padding: 0.5rem 1rem;
   transition: color 0.3s ease;
 }
 
 .navbar-nav .nav-link:hover {
-  color: #007bff;
+  color: var(--bs-kale-accent, #CD853F);
 }
 
 /* RTL-specific styles */
@@ -60,7 +65,7 @@
 @media (max-width: 991.98px) {
   .navbar {
     margin: 10px;
-    border-radius: 12px;
+    border-radius: 14px;
   }
   
   .navbar-nav {
@@ -84,16 +89,16 @@
 }
 
 .navbar-toggler:hover {
-  background-color: rgba(13, 110, 253, 0.1);
+  background-color: rgba(107, 66, 38, 0.08);
 }
 
 .navbar-toggler:focus {
-  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+  box-shadow: 0 0 0 0.2rem rgba(205, 133, 63, 0.25);
 }
 
 /* User profile section styling */
 .user-profile-section {
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  background: linear-gradient(135deg, var(--bs-kale-cream, #F5EDE3) 0%, #ece0d4 100%);
   border-radius: 25px;
   padding: 8px 12px;
   transition: all 0.3s ease;
@@ -101,7 +106,7 @@
 
 .user-profile-section:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 8px rgba(107, 66, 38, 0.1);
 }
 
 /* Animations */
@@ -133,32 +138,32 @@
 
 .nav-link-custom {
   transition: all 0.3s ease;
-  border-radius: 8px;
+  border-radius: 10px;
   margin: 0 4px;
   padding: 8px 12px !important;
 }
 
 .nav-link-custom:hover {
-  background-color: rgba(13, 110, 253, 0.1);
-  color: #0d6efd !important;
+  background-color: rgba(107, 66, 38, 0.07);
+  color: var(--bs-kale-brown, #6B4226) !important;
   transform: translateY(-1px);
 }
 
 .nav-dropdown-custom .dropdown-toggle {
   transition: all 0.3s ease;
-  border-radius: 8px;
+  border-radius: 10px;
   margin: 0 4px;
   padding: 8px 12px !important;
 }
 
 .nav-dropdown-custom .dropdown-toggle:hover {
-  background-color: rgba(13, 110, 253, 0.1);
-  color: #0d6efd !important;
+  background-color: rgba(107, 66, 38, 0.07);
+  color: var(--bs-kale-brown, #6B4226) !important;
 }
 
 .dropdown-item-custom {
   transition: all 0.3s ease;
-  border-radius: 6px;
+  border-radius: 8px;
   margin: 2px 8px;
   padding: 8px 12px;
   display: flex;
@@ -166,15 +171,15 @@
 }
 
 .dropdown-item-custom:hover {
-  background-color: rgba(13, 110, 253, 0.1);
-  color: #0d6efd;
+  background-color: rgba(107, 66, 38, 0.07);
+  color: var(--bs-kale-brown, #6B4226);
   transform: translateX(5px);
 }
 
 .dropdown-menu {
   border: none;
-  box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(107, 66, 38, 0.12);
+  border-radius: 14px;
   padding: 8px;
   margin-top: 8px;
 }

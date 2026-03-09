@@ -1,5 +1,6 @@
 // Kale Cafe API Configuration
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://kale-cafe.com';
+// const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 export const API_ENDPOINTS = {
   // Authentication
@@ -92,6 +93,25 @@ export const API_ENDPOINTS = {
       ADD: '/api/addSpecialImage',
       DELETE: (id) => `/api/deleteSpecialImage/${id}`,
     },
+  },
+
+  // Tables
+  TABLES: {
+    GET_ALL: '/api/tables',
+    ADD: '/api/tables',
+    UPDATE: (id) => `/api/tables/${id}`,
+    DELETE: (id) => `/api/tables/${id}`,
+  },
+
+  // Orders
+  ORDERS: {
+    GET_ALL: '/api/orders',
+    LOGS: '/api/orders/logs',
+    GET_BY_TABLE: (tableId) => `/api/orders/table/${tableId}`,
+    ADD: '/api/orders',
+    UPDATE: (id) => `/api/orders/${id}`,
+    UPDATE_STATUS: (id) => `/api/orders/${id}/status`,
+    DELETE: (id) => `/api/orders/${id}`,
   },
 };
 

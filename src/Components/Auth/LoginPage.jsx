@@ -240,6 +240,20 @@ const LoginPage = () => {
                                 </form>
 
                             </div>
+
+                            {/* Security Notice */}
+                            <div className="mt-4 p-3 rounded-3" style={{ backgroundColor: 'rgba(107, 66, 38, 0.04)' }}>
+                                <div className="d-flex align-items-center">
+                                    <div className="rounded-circle d-flex align-items-center justify-content-center me-3"
+                                        style={{ width: '38px', height: '38px', minWidth: '38px', backgroundColor: 'rgba(107, 66, 38, 0.08)' }}>
+                                        <i className="bi bi-shield-check" style={{ color: '#6B4226' }}></i>
+                                    </div>
+                                    <div>
+                                        <small className="fw-semibold d-block" style={{ color: '#4A2E1A' }}>نظام آمن ومحمي</small>
+                                        <small className="text-muted">للوصول إلى هذا النظام، يجب أن تكون مدير معتمد</small>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
                         {/* Footer */}

@@ -7,10 +7,14 @@ const ProtectedRoute = ({ children }) => {
 
     if (isLoading) {
         return (
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+            <div className="d-flex align-items-center justify-content-center" 
+              style={{ minHeight: '100vh', backgroundColor: 'var(--bs-kale-cream, #F5EDE3)' }}>
                 <div className="text-center">
-                    <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                    <p className="text-gray-600">Loading...</p>
+                    <div className="spinner-border mb-3" role="status"
+                      style={{ width: '3rem', height: '3rem', color: '#6B4226' }}>
+                        <span className="visually-hidden">Loading...</span>
+                    </div>
+                    <p style={{ color: '#8B5E3C', fontFamily: "'Cairo', sans-serif" }}>جاري التحميل...</p>
                 </div>
             </div>
         );
@@ -23,4 +27,4 @@ const ProtectedRoute = ({ children }) => {
     return children;
 };
 
-export default ProtectedRoute; 
+export default ProtectedRoute;

@@ -13,8 +13,11 @@ import FoodsPage from "./Components/Pages/FoodsPage";
 import DessertsPage from "./Components/Pages/DessertsPage";
 import HookahPage from "./Components/Pages/HookahPage";
 import SpecialImagesPage from "./Components/Pages/SpecialImagesPage";
+import TablesPage from "./Components/Pages/TablesPage";
+import OrderLogsPage from "./Components/Pages/OrderLogsPage";
 import ProtectedRoute from "./Components/Auth/ProtectedRoute";
 import { AuthProvider } from "./context/AuthContext";
+import { ConfirmProvider } from "./Components/ConfirmDialog";
 
 function App() {
   const router = createBrowserRouter([
@@ -37,6 +40,8 @@ function App() {
         { path: "/desserts", element: <DessertsPage /> },
         { path: "/hookah", element: <HookahPage /> },
         { path: "/special-images", element: <SpecialImagesPage /> },
+        { path: "/tables", element: <TablesPage /> },
+        { path: "/order-logs", element: <OrderLogsPage /> },
         { path: "*", element: <NotFound /> },
       ],
     },
@@ -44,7 +49,9 @@ function App() {
 
   return (
     <AuthProvider>
-      <RouterProvider router={router} />
+      <ConfirmProvider>
+        <RouterProvider router={router} />
+      </ConfirmProvider>
     </AuthProvider>
   );
 }

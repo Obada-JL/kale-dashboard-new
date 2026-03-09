@@ -17,7 +17,7 @@ export default function NavBar() {
       text: "سيتم تسجيل خروجك من النظام!",
       icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: "#3085d6",
+      confirmButtonColor: "#6B4226",
       cancelButtonColor: "#d33",
       confirmButtonText: "نعم، تسجيل الخروج",
       cancelButtonText: "إلغاء"
@@ -81,7 +81,7 @@ export default function NavBar() {
                 onClick={() => setExpanded(false)}
                 className="dropdown-item-custom"
               >
-                <i className="bi bi-egg-fried me-2 text-primary"></i>
+                <i className="bi bi-egg-fried me-2" style={{ color: '#6B4226' }}></i>
                 الأطعمة
               </NavDropdown.Item>
               <NavDropdown.Item
@@ -90,7 +90,7 @@ export default function NavBar() {
                 onClick={() => setExpanded(false)}
                 className="dropdown-item-custom"
               >
-                <i className="bi bi-cup-straw me-2 text-info"></i>
+                <i className="bi bi-cup-straw me-2" style={{ color: '#8B5E3C' }}></i>
                 المشروبات
               </NavDropdown.Item>
               <NavDropdown.Item
@@ -99,7 +99,7 @@ export default function NavBar() {
                 onClick={() => setExpanded(false)}
                 className="dropdown-item-custom"
               >
-                <i className="bi bi-cake2 me-2 text-warning"></i>
+                <i className="bi bi-cake2 me-2" style={{ color: '#CD853F' }}></i>
                 الحلويات
               </NavDropdown.Item>
               <NavDropdown.Item
@@ -108,7 +108,7 @@ export default function NavBar() {
                 onClick={() => setExpanded(false)}
                 className="dropdown-item-custom"
               >
-                <i className="bi bi-cloud me-2 text-secondary"></i>
+                <i className="bi bi-cloud me-2" style={{ color: '#D2B48C' }}></i>
                 الأراكيل
               </NavDropdown.Item>
               <NavDropdown.Divider />
@@ -118,11 +118,30 @@ export default function NavBar() {
                 onClick={() => setExpanded(false)}
                 className="dropdown-item-custom"
               >
-                <i className="bi bi-images me-2 text-success"></i>
+                <i className="bi bi-images me-2" style={{ color: '#8B5E3C' }}></i>
                 الصور الخاصة
               </NavDropdown.Item>
             </NavDropdown>
 
+            <Nav.Link
+              as={Link}
+              to="/tables"
+              onClick={() => setExpanded(false)}
+              className="fw-semibold nav-link-custom"
+            >
+              <i className="bi bi-grid-1x2 me-2" style={{ color: '#CD853F' }}></i>
+              إدارة الطاولات
+            </Nav.Link>
+
+            <Nav.Link
+              as={Link}
+              to="/order-logs"
+              onClick={() => setExpanded(false)}
+              className="fw-semibold nav-link-custom"
+            >
+              <i className="bi bi-journal-text me-2" style={{ color: '#8B5E3C' }}></i>
+              سجل الطلبات
+            </Nav.Link>
             {user?.role === 'admin' && (
               <Nav.Link
                 as={Link}
@@ -145,8 +164,8 @@ export default function NavBar() {
                   {user?.role === 'admin' ? 'مدير' : user?.role === 'manager' ? 'مشرف' : 'موظف'}
                 </div>
               </div>
-              <div className="bg-primary rounded-circle d-flex align-items-center justify-content-center"
-                style={{ width: '35px', height: '35px' }}>
+              <div className="rounded-circle d-flex align-items-center justify-content-center"
+                style={{ width: '35px', height: '35px', background: 'linear-gradient(135deg, #6B4226 0%, #CD853F 100%)' }}>
                 <i className="bi bi-person-fill text-white"></i>
               </div>
             </div>

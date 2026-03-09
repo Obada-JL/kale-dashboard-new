@@ -1,45 +1,7 @@
-/* #root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
-} */
-
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
-}
-
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
-}
-
-.card {
-  padding: 2em;
-}
-
-.read-the-docs {
-  color: #888;
-}
+/* ===========================
+   Kale Cafe Dashboard — App.css
+   Brand: Brown castle theme
+   =========================== */
 
 /* Global Styles */
 * {
@@ -51,7 +13,7 @@
 body {
   font-family: 'Cairo', 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
   direction: rtl;
-  background-color: #f8f9fa;
+  background-color: var(--bs-kale-cream, #F5EDE3);
   color: #333;
   line-height: 1.6;
 }
@@ -73,43 +35,104 @@ body {
   text-align: left !important;
 }
 
-/* Custom Bootstrap Icons colors */
-.text-purple {
-  color: #6f42c1 !important;
+/* ===========================
+   Brand Color Utilities
+   =========================== */
+.text-kale {
+  color: var(--bs-kale-brown, #6B4226) !important;
 }
 
-.bg-purple {
-  background-color: #6f42c1 !important;
+.bg-kale {
+  background-color: var(--bs-kale-brown, #6B4226) !important;
 }
 
-.border-purple {
-  border-color: #6f42c1 !important;
+.border-kale {
+  border-color: var(--bs-kale-brown, #6B4226) !important;
 }
 
-/* Card hover effects */
+.text-kale-accent {
+  color: var(--bs-kale-accent, #CD853F) !important;
+}
+
+.bg-kale-accent {
+  background-color: var(--bs-kale-accent, #CD853F) !important;
+}
+
+/* ===========================
+   Card Styles
+   =========================== */
 .card {
   transition: all 0.3s ease;
   border: none;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(107, 66, 38, 0.08);
+  border-radius: 14px;
+  background-color: #fff;
 }
 
 .card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 6px 16px rgba(107, 66, 38, 0.12);
 }
 
-/* Modern button styling */
+/* ===========================
+   Button Styles
+   =========================== */
 .btn {
-  border-radius: 8px;
+  border-radius: 10px;
   font-weight: 500;
   transition: all 0.3s ease;
   border: none;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px rgba(107, 66, 38, 0.1);
 }
 
 .btn:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 12px rgba(107, 66, 38, 0.18);
+}
+
+/* Brand primary button */
+.btn-primary {
+  background: linear-gradient(135deg, var(--bs-kale-brown, #6B4226) 0%, var(--bs-kale-accent, #CD853F) 100%) !important;
+  border: none !important;
+  color: #fff !important;
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+  background: linear-gradient(135deg, var(--bs-kale-brown-dark, #4A2E1A) 0%, var(--bs-kale-brown, #6B4226) 100%) !important;
+  box-shadow: 0 4px 14px rgba(107, 66, 38, 0.3) !important;
+}
+
+.btn-outline-primary {
+  color: var(--bs-kale-brown, #6B4226) !important;
+  border: 1.5px solid var(--bs-kale-brown, #6B4226) !important;
+  background: transparent !important;
+}
+
+.btn-outline-primary:hover {
+  background: var(--bs-kale-brown, #6B4226) !important;
+  color: #fff !important;
+}
+
+/* Outline secondary buttons — warm variants */
+.btn-outline-info {
+  color: var(--bs-kale-brown-light, #8B5E3C) !important;
+  border: 1.5px solid var(--bs-kale-brown-light, #8B5E3C) !important;
+}
+
+.btn-outline-info:hover {
+  background: var(--bs-kale-brown-light, #8B5E3C) !important;
+  color: #fff !important;
+}
+
+.btn-outline-success {
+  color: var(--bs-kale-accent, #CD853F) !important;
+  border: 1.5px solid var(--bs-kale-accent, #CD853F) !important;
+}
+
+.btn-outline-success:hover {
+  background: var(--bs-kale-accent, #CD853F) !important;
+  color: #fff !important;
 }
 
 .btn-outline-primary:hover,
@@ -120,47 +143,61 @@ body {
   transform: translateY(-1px);
 }
 
-/* Typography improvements */
+/* ===========================
+   Typography
+   =========================== */
 h1, h2, h3, h4, h5, h6 {
   font-weight: 600;
-  color: #2c3e50;
+  color: var(--bs-kale-brown-dark, #4A2E1A);
 }
 
 .display-6 {
   font-weight: 700;
 }
 
-/* Badge styling */
+/* ===========================
+   Badge Styles
+   =========================== */
 .badge {
   font-weight: 500;
   border-radius: 6px;
   padding: 0.5em 0.8em;
 }
 
-/* Form controls */
+.badge.bg-primary {
+  background: var(--bs-kale-brown, #6B4226) !important;
+}
+
+/* ===========================
+   Form Controls
+   =========================== */
 .form-control, .form-select {
-  border-radius: 8px;
-  border: 1px solid #e1e5e9;
+  border-radius: 10px;
+  border: 1.5px solid #e0d5ca;
   transition: all 0.3s ease;
+  background-color: var(--bs-kale-beige, #FDF8F3);
 }
 
 .form-control:focus, .form-select:focus {
-  border-color: #0d6efd;
-  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
+  border-color: var(--bs-kale-accent, #CD853F);
+  box-shadow: 0 0 0 0.2rem rgba(205, 133, 63, 0.18);
+  background-color: #fff;
 }
 
-/* Table styling */
+/* ===========================
+   Table Styles
+   =========================== */
 .table {
-  border-radius: 12px;
+  border-radius: 14px;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(107, 66, 38, 0.06);
 }
 
 .table thead th {
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  background: linear-gradient(135deg, var(--bs-kale-cream, #F5EDE3) 0%, #ece0d4 100%);
   border: none;
   font-weight: 600;
-  color: #495057;
+  color: var(--bs-kale-brown-dark, #4A2E1A);
   padding: 16px 12px;
 }
 
@@ -169,29 +206,43 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .table tbody tr:hover {
-  background-color: rgba(13, 110, 253, 0.05);
+  background-color: rgba(205, 133, 63, 0.06);
 }
 
-/* Modal improvements */
+/* ===========================
+   Modal Styles
+   =========================== */
 .modal-content {
-  border-radius: 16px;
+  border-radius: 18px;
   border: none;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 20px 40px rgba(107, 66, 38, 0.15);
 }
 
 .modal-header {
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-  border-radius: 16px 16px 0 0;
+  background: linear-gradient(135deg, var(--bs-kale-cream, #F5EDE3) 0%, #ece0d4 100%);
+  border-bottom: 1px solid rgba(107, 66, 38, 0.08);
+  border-radius: 18px 18px 0 0;
 }
 
-/* Loading states */
+.modal-header .modal-title {
+  color: var(--bs-kale-brown-dark, #4A2E1A);
+}
+
+/* ===========================
+   Loading States
+   =========================== */
 .spinner-border-sm {
   width: 1rem;
   height: 1rem;
 }
 
-/* Responsive design */
+.spinner-border {
+  color: var(--bs-kale-brown, #6B4226);
+}
+
+/* ===========================
+   Responsive Design
+   =========================== */
 @media (max-width: 768px) {
   .container-fluid {
     padding: 0 10px;
@@ -206,7 +257,9 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
-/* Animation classes */
+/* ===========================
+   Animations
+   =========================== */
 @keyframes fadeInUp {
   from {
     opacity: 0;
@@ -222,26 +275,30 @@ h1, h2, h3, h4, h5, h6 {
   animation: fadeInUp 0.6s ease-out;
 }
 
-/* Custom scrollbar */
+/* ===========================
+   Custom Scrollbar
+   =========================== */
 ::-webkit-scrollbar {
   width: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: var(--bs-kale-cream, #F5EDE3);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
+  background: var(--bs-kale-tan, #D2B48C);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #a8a8a8;
+  background: var(--bs-kale-accent, #CD853F);
 }
 
-/* Page transitions */
+/* ===========================
+   Page Transitions
+   =========================== */
 .page-enter {
   opacity: 0;
   transform: translateY(20px);
@@ -253,36 +310,110 @@ h1, h2, h3, h4, h5, h6 {
   transition: all 0.5s ease;
 }
 
-/* Utility classes */
+/* ===========================
+   Utility Classes
+   =========================== */
 .text-shadow {
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  text-shadow: 0 2px 4px rgba(107, 66, 38, 0.1);
 }
 
 .shadow-soft {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 2px 8px rgba(107, 66, 38, 0.08) !important;
 }
 
 .rounded-lg {
-  border-radius: 12px !important;
+  border-radius: 14px !important;
 }
 
 .rounded-xl {
-  border-radius: 16px !important;
+  border-radius: 18px !important;
 }
 
-/* Gradient backgrounds */
+/* ===========================
+   Gradient Backgrounds
+   =========================== */
 .bg-gradient-primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  background: linear-gradient(135deg, var(--bs-kale-brown, #6B4226) 0%, var(--bs-kale-accent, #CD853F) 100%) !important;
 }
 
 .bg-gradient-success {
-  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%) !important;
+  background: linear-gradient(135deg, var(--bs-kale-brown-light, #8B5E3C) 0%, var(--bs-kale-tan, #D2B48C) 100%) !important;
 }
 
 .bg-gradient-warning {
-  background: linear-gradient(135deg, #fa709a 0%, #fee140 100%) !important;
+  background: linear-gradient(135deg, var(--bs-kale-accent, #CD853F) 0%, var(--bs-kale-tan, #D2B48C) 100%) !important;
 }
 
 .bg-gradient-info {
-  background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%) !important;
+  background: linear-gradient(135deg, var(--bs-kale-cream, #F5EDE3) 0%, var(--bs-kale-tan, #D2B48C) 100%) !important;
+}
+
+/* ===========================
+   Bootstrap Overrides — Brand
+   =========================== */
+.bg-primary {
+  background-color: var(--bs-kale-brown, #6B4226) !important;
+}
+
+.bg-success {
+  background-color: var(--bs-kale-brown-light, #8B5E3C) !important;
+}
+
+.bg-info {
+  background-color: var(--bs-kale-accent, #CD853F) !important;
+}
+
+.bg-warning {
+  background-color: var(--bs-kale-tan, #D2B48C) !important;
+}
+
+.text-primary {
+  color: var(--bs-kale-brown, #6B4226) !important;
+}
+
+.text-info {
+  color: var(--bs-kale-accent, #CD853F) !important;
+}
+
+.text-success {
+  color: var(--bs-kale-brown-light, #8B5E3C) !important;
+}
+
+.text-warning {
+  color: var(--bs-kale-tan, #D2B48C) !important;
+}
+
+.border-primary {
+  border-color: var(--bs-kale-brown, #6B4226) !important;
+}
+
+.border-info {
+  border-color: var(--bs-kale-accent, #CD853F) !important;
+}
+
+.border-success {
+  border-color: var(--bs-kale-brown-light, #8B5E3C) !important;
+}
+
+.border-warning {
+  border-color: var(--bs-kale-tan, #D2B48C) !important;
+}
+
+/* Purple class → use brand brown */
+.text-purple {
+  color: var(--bs-kale-brown, #6B4226) !important;
+}
+
+.bg-purple {
+  background-color: var(--bs-kale-brown, #6B4226) !important;
+}
+
+.border-purple {
+  border-color: var(--bs-kale-brown, #6B4226) !important;
+}
+
+/* Card header bg-light override */
+.card-header.bg-light {
+  background: linear-gradient(135deg, var(--bs-kale-cream, #F5EDE3) 0%, #ece0d4 100%) !important;
+  border-bottom: 1px solid rgba(107, 66, 38, 0.08);
 }

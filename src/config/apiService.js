@@ -148,6 +148,28 @@ export const apiService = {
       delete: (id) => apiClient.delete(API_ENDPOINTS.IMAGES.SPECIAL.DELETE(id)),
     },
   },
+
+  // Tables
+  tables: {
+    getAll: () => apiClient.get(API_ENDPOINTS.TABLES.GET_ALL),
+    add: (data) => apiClient.post(API_ENDPOINTS.TABLES.ADD, data),
+    update: (id, data) => apiClient.put(API_ENDPOINTS.TABLES.UPDATE(id), data),
+    delete: (id) => apiClient.delete(API_ENDPOINTS.TABLES.DELETE(id)),
+  },
+
+  // Orders
+  orders: {
+    getAll: (status) => apiClient.get(API_ENDPOINTS.ORDERS.GET_ALL + (status ? `?status=${status}` : '')),
+    getLogs: (params) => {
+      const query = new URLSearchParams(params).toString();
+      return apiClient.get(API_ENDPOINTS.ORDERS.LOGS + (query ? `?${query}` : ''));
+    },
+    getByTable: (tableId) => apiClient.get(API_ENDPOINTS.ORDERS.GET_BY_TABLE(tableId)),
+    add: (data) => apiClient.post(API_ENDPOINTS.ORDERS.ADD, data),
+    update: (id, data) => apiClient.put(API_ENDPOINTS.ORDERS.UPDATE(id), data),
+    updateStatus: (id, status) => apiClient.put(API_ENDPOINTS.ORDERS.UPDATE_STATUS(id), { status }),
+    delete: (id) => apiClient.delete(API_ENDPOINTS.ORDERS.DELETE(id)),
+  },
 };
 
 // Utility functions

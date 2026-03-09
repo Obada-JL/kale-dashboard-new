@@ -1,5 +1,9 @@
+/* ===========================
+   MainPage — Kale Cafe Brand
+   =========================== */
+
 .main-page {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(247, 250, 255, 0.95) 100%);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, var(--bs-kale-cream, #F5EDE3) 100%);
   overflow-x: hidden;
   width: 85%;
 }
@@ -26,14 +30,14 @@
 .welcome-title {
   font-size: clamp(1.5rem, 4vw, 2.5rem);
   font-weight: 700;
-  color: #2c3e50;
+  color: var(--bs-kale-brown-dark, #4A2E1A);
   margin-bottom: 1.5rem;
   line-height: 1.4;
 }
 
 .welcome-subtitle {
   font-size: clamp(1rem, 2vw, 1.25rem);
-  color: #6c757d;
+  color: #8B5E3C;
   margin-bottom: 2rem;
 }
 
@@ -105,6 +109,6 @@
 /* Ensure content is centered on all screen sizes */
 @media (min-width: 993px) {
   .main-page .row {
-    min-height: calc(100vh - 70px); /* Account for navbar height */
+    min-height: calc(100vh - 70px);
   }
-} 
+}

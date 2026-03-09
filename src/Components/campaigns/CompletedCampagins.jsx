@@ -16,7 +16,7 @@ export default function CompletedCampaigns() {
     setLoading(true);
     try {
       const response = await axios.get(
-        "https://kale-cafe.com/api/completed-campaigns"
+        "http://localhost:5000/api/completed-campaigns"
       );
       setCampaigns(response.data);
     } catch (error) {
@@ -96,8 +96,8 @@ export default function CompletedCampaigns() {
       formData.append("details", JSON.stringify([details]));
 
       const url = modalMode === "add"
-        ? "https://kale-cafe.com/api/completed-campaigns"
-        : `https://kale-cafe.com/api/completed-campaigns/${selectedCampaign._id}`;
+        ? "http://localhost:5000/api/completed-campaigns"
+        : `http://localhost:5000/api/completed-campaigns/${selectedCampaign._id}`;
 
       await axios({
         method: modalMode === "add" ? "post" : "put",
@@ -121,7 +121,7 @@ export default function CompletedCampaigns() {
     if (window.confirm("هل أنت متأكد من حذف هذه الحملة؟")) {
       setLoading(true);
       try {
-        await axios.delete(`https://kale-cafe.com/api/completed-campaigns/${id}`);
+        await axios.delete(`http://localhost:5000/api/completed-campaigns/${id}`);
         fetchCampaigns();
       } catch (error) {
         console.error("Error deleting campaign:", error);
@@ -174,7 +174,7 @@ export default function CompletedCampaigns() {
                 <tr key={campaign._id}>
                   <td>
                     <img
-                      src={`https://kale-cafe.com/uploads/completed-campaigns/${campaign.image}`}
+                      src={`http://localhost:5000/uploads/completed-campaigns/${campaign.image}`}
                       alt={campaign.title}
                       style={{ width: "100px", height: "60px", objectFit: "cover" }}
                     />
@@ -473,7 +473,7 @@ export default function CompletedCampaigns() {
             <div className="view-campaign-details">
               <div className="text-center mb-4">
                 <img
-                  src={`https://kale-cafe.com/uploads/completed-campaigns/${viewCampaign.image}`}
+                  src={`http://localhost:5000/uploads/completed-campaigns/${viewCampaign.image}`}
                   alt={viewCampaign.title}
                   className="img-fluid"
                   style={{ maxHeight: "300px", objectFit: "contain" }}

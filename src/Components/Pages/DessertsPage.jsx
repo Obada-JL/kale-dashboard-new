@@ -567,7 +567,7 @@ const DessertsPage = () => {
                                         <div key={image._id} className="col-6">
                                             <div className="position-relative">
                                                 <img
-                                                    src={`https://kale-cafe.com/uploads/${image.imagePath}`}
+                                                    src={`http://localhost:5000/uploads/${image.imagePath}`}
                                                     alt="Dessert"
                                                     className="img-fluid rounded shadow-sm"
                                                     style={{ height: '100px', width: '100%', objectFit: 'cover' }}

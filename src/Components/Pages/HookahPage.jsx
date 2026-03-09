@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import { apiService, handleApiError } from '../../config/apiService';
 import { exportToExcel, exportImagesToExcel, exportCategoriesToExcel } from '../../utils/excelExport';
-import DraggableCategories from '../DraggableCategories';
 
 const HookahPage = () => {
     const [categories, setCategories] = useState([]);
@@ -35,7 +34,7 @@ const HookahPage = () => {
             const response = await apiService.categories.getHookahCategories();
             setCategories(response.data);
         } catch (error) {
-            handleApiError(error, 'جلب فئات الأراكيل');
+            handleApiError(error, 'جلب فئات الشيشة');
         }
     };
 
@@ -44,7 +43,7 @@ const HookahPage = () => {
             const response = await apiService.hookahs.getAll();
             setProducts(response.data);
         } catch (error) {
-            handleApiError(error, 'جلب نكهات الأراكيل');
+            handleApiError(error, 'جلب نكهات الشيشة');
         }
     };
 
@@ -53,7 +52,7 @@ const HookahPage = () => {
             const response = await apiService.images.hookah.getAll();
             setImages(response.data);
         } catch (error) {
-            handleApiError(error, 'جلب صور الأراكيل');
+            handleApiError(error, 'جلب صور الشيشة');
         }
     };
 
@@ -96,7 +95,7 @@ const HookahPage = () => {
             });
             setShowAddForm(false);
             await fetchProducts();
-            toast.success('تم إضافة نكهة الأراكيل بنجاح');
+            toast.success('تم إضافة نكهة الشيشة بنجاح');
         } catch (error) {
             handleApiError(error, 'إضافة نكهة شيشة');
         } finally {
@@ -116,7 +115,7 @@ const HookahPage = () => {
             await apiService.hookahs.update(editingProduct._id, editingProduct);
             setEditingProduct(null);
             await fetchProducts();
-            toast.success('تم تحديث نكهة الأراكيل بنجاح');
+            toast.success('تم تحديث نكهة الشيشة بنجاح');
         } catch (error) {
             handleApiError(error, 'تحديث نكهة شيشة');
         } finally {
@@ -152,54 +151,15 @@ const HookahPage = () => {
     };
 
     const handleDeleteCategory = async (categoryId, categoryName) => {
-        if (window.confirm(`هل أنت متأكد من حذف فئة "${categoryName}"؟`)) {
-            try {
-                setIsLoading(true);
-                await apiService.categories.delete(categoryId);
-                await fetchCategories();
-                toast.success('تم حذف الفئة بنجاح');
-            } catch (error) {
-                handleApiError(error, 'حذف الفئة');
-            } finally {
-                setIsLoading(false);
-            }
-        }
-    };
+        if (!window.confirm(`هل أنت متأكد من حذف فئة "${categoryName}"؟`)) return;
 
-    const handleUpdateCategoryOrder = async (categoryId, order) => {
         try {
             setIsLoading(true);
-            await apiService.categories.updateOrder(categoryId, order);
+            await apiService.categories.delete(categoryId);
             await fetchCategories();
-            toast.success('تم تحديث ترتيب الفئة بنجاح');
+            toast.success('تم حذف الفئة بنجاح');
         } catch (error) {
-            handleApiError(error, 'تحديث ترتيب الفئة');
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    const handleReorderCategories = async (sourceIndex, destinationIndex) => {
-        try {
-            setIsLoading(true);
-
-            // Create a new array with reordered items
-            const reorderedCategories = Array.from(categories);
-            const [removed] = reorderedCategories.splice(sourceIndex, 1);
-            reorderedCategories.splice(destinationIndex, 0, removed);
-
-            // Update the order values based on new positions
-            const updates = reorderedCategories.map((category, index) => ({
-                id: category._id,
-                order: index + 1
-            }));
-
-            // Update the backend first, then refresh
-            await apiService.categories.batchUpdateOrder(updates);
-            await fetchCategories();
-            toast.success('تم إعادة ترتيب الفئات بنجاح');
-        } catch (error) {
-            handleApiError(error, 'إعادة ترتيب الفئات');
+            handleApiError(error, 'حذف فئة');
         } finally {
             setIsLoading(false);
         }
@@ -212,7 +172,7 @@ const HookahPage = () => {
             setIsLoading(true);
             await apiService.hookahs.delete(productId);
             await fetchProducts();
-            toast.success('تم حذف نكهة الأراكيل بنجاح');
+            toast.success('تم حذف نكهة الشيشة بنجاح');
         } catch (error) {
             handleApiError(error, 'حذف نكهة شيشة');
         } finally {
@@ -309,9 +269,9 @@ const HookahPage = () => {
                         <div>
                             <h1 className="display-6 fw-bold text-dark mb-1">
                                 <i className="bi bi-cloud text-secondary me-3"></i>
-                                إدارة الأراكيل
+                                إدارة الشيشة
                             </h1>
-                            <p className="text-muted fs-5">إدارة قائمة نكهات الأراكيل والفئات والصور</p>
+                            <p className="text-muted fs-5">إدارة قائمة نكهات الشيشة والفئات والصور</p>
                         </div>
                         <div className="d-flex gap-2">
                             <div className="btn-group" role="group">
@@ -418,7 +378,7 @@ const HookahPage = () => {
                                     <input
                                         type="text"
                                         className="form-control"
-                                        placeholder="ابحث في نكهات الأراكيل..."
+                                        placeholder="ابحث في نكهات الشيشة..."
                                         value={searchTerm}
                                         onChange={(e) => setSearchTerm(e.target.value)}
                                     />
@@ -464,7 +424,7 @@ const HookahPage = () => {
                         <div className="card-header bg-light border-0">
                             <h5 className="card-title mb-0">
                                 <i className="bi bi-list-ul me-2"></i>
-                                قائمة نكهات الأراكيل ({filteredProducts.length})
+                                قائمة نكهات الشيشة ({filteredProducts.length})
                             </h5>
                         </div>
                         <div className="card-body p-0">
@@ -535,12 +495,22 @@ const HookahPage = () => {
                         </div>
                         <div className="card-body">
                             {categories.length > 0 ? (
-                                <DraggableCategories
-                                    categories={categories}
-                                    onReorder={handleReorderCategories}
-                                    onDelete={handleDeleteCategory}
-                                    isLoading={isLoading}
-                                />
+                                <div className="row g-2">
+                                    {categories.map((category) => (
+                                        <div key={category._id} className="col-12">
+                                            <div className="d-flex justify-content-between align-items-center p-3 bg-light rounded">
+                                                <span className="fw-semibold">{category.name}</span>
+                                                <button
+                                                    onClick={() => handleDeleteCategory(category._id, category.name)}
+                                                    className="btn btn-sm btn-outline-danger"
+                                                    disabled={isLoading}
+                                                >
+                                                    <i className="bi bi-trash"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
                             ) : (
                                 <div className="text-center py-4">
                                     <i className="bi bi-folder-x text-muted" style={{ fontSize: '2rem' }}></i>
@@ -567,7 +537,7 @@ const HookahPage = () => {
                                         <div key={image._id} className="col-6">
                                             <div className="position-relative">
                                                 <img
-                                                    src={`https://kale-cafe.com/uploads/${image.imagePath}`}
+                                                    src={`http://localhost:5000/uploads/${image.imagePath}`}
                                                     alt="Hookah"
                                                     className="img-fluid rounded shadow-sm"
                                                     style={{ height: '100px', width: '100%', objectFit: 'cover' }}

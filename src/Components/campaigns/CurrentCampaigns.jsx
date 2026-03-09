@@ -15,7 +15,7 @@ export default function CurrentCampaigns() {
     setLoading(true);
     try {
       const response = await axios.get(
-        "https://kale-cafe.com/api/current-campaigns"
+        "http://localhost:5000/api/current-campaigns"
       );
       setCampaigns(response.data);
     } catch (error) {
@@ -103,8 +103,8 @@ export default function CurrentCampaigns() {
       formData.append("details", JSON.stringify(selectedCampaign.details));
 
       const url = modalMode === "add"
-        ? "https://kale-cafe.com/api/current-campaigns"
-        : `https://kale-cafe.com/api/current-campaigns/${selectedCampaign._id}`;
+        ? "http://localhost:5000/api/current-campaigns"
+        : `http://localhost:5000/api/current-campaigns/${selectedCampaign._id}`;
 
       await axios({
         method: modalMode === "add" ? "post" : "put",
@@ -129,7 +129,7 @@ export default function CurrentCampaigns() {
     if (window.confirm("هل أنت متأكد من حذف هذه الحملة؟")) {
       setLoading(true);
       try {
-        await axios.delete(`https://kale-cafe.com/api/current-campaigns/${id}`);
+        await axios.delete(`http://localhost:5000/api/current-campaigns/${id}`);
         fetchCampaigns();
       } catch (error) {
         console.error("Error deleting campaign:", error);
@@ -181,7 +181,7 @@ export default function CurrentCampaigns() {
                 <tr key={campaign._id}>
                   <td>
                     <img
-                      src={`https://kale-cafe.com/uploads/current-campaigns/${campaign.image}`}
+                      src={`http://localhost:5000/uploads/current-campaigns/${campaign.image}`}
                       alt={campaign.title}
                       style={{ width: "100px", height: "60px", objectFit: "cover" }}
                     />
@@ -445,7 +445,7 @@ export default function CurrentCampaigns() {
             <div className="view-campaign-details">
               <div className="text-center mb-4">
                 <img
-                  src={`https://kale-cafe.com/uploads/current-campaigns/${viewCampaign.image}`}
+                  src={`http://localhost:5000/uploads/current-campaigns/${viewCampaign.image}`}
                   alt={viewCampaign.title}
                   className="img-fluid"
                   style={{ maxHeight: "300px", objectFit: "contain" }}
