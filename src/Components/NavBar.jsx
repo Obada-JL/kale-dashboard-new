@@ -54,74 +54,78 @@ export default function NavBar() {
 
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="me-auto">
-            <Nav.Link
-              as={Link}
-              to="/"
-              onClick={() => setExpanded(false)}
-              className="fw-semibold nav-link-custom"
-            >
-              <i className="bi bi-house-door me-2"></i>
-              الرئيسية
-            </Nav.Link>
+            {user?.role !== 'staff' && (
+              <Nav.Link
+                as={Link}
+                to="/"
+                onClick={() => setExpanded(false)}
+                className="fw-semibold nav-link-custom"
+              >
+                <i className="bi bi-house-door me-2"></i>
+                الرئيسية
+              </Nav.Link>
+            )}
 
-            {/* Menu Management Dropdown */}
-            <NavDropdown
-              title={
-                <span className="fw-semibold">
-                  <i className="bi bi-menu-button-wide me-2"></i>
-                  إدارة القائمة
-                </span>
-              }
-              id="menu-dropdown"
-              className="nav-dropdown-custom"
-            >
-              <NavDropdown.Item
-                as={Link}
-                to="/foods"
-                onClick={() => setExpanded(false)}
-                className="dropdown-item-custom"
+            {/* Menu Management Dropdown - hidden for employees */}
+            {user?.role !== 'staff' && (
+              <NavDropdown
+                title={
+                  <span className="fw-semibold">
+                    <i className="bi bi-menu-button-wide me-2"></i>
+                    إدارة القائمة
+                  </span>
+                }
+                id="menu-dropdown"
+                className="nav-dropdown-custom"
               >
-                <i className="bi bi-egg-fried me-2" style={{ color: '#6B4226' }}></i>
-                الأطعمة
-              </NavDropdown.Item>
-              <NavDropdown.Item
-                as={Link}
-                to="/drinks"
-                onClick={() => setExpanded(false)}
-                className="dropdown-item-custom"
-              >
-                <i className="bi bi-cup-straw me-2" style={{ color: '#8B5E3C' }}></i>
-                المشروبات
-              </NavDropdown.Item>
-              <NavDropdown.Item
-                as={Link}
-                to="/desserts"
-                onClick={() => setExpanded(false)}
-                className="dropdown-item-custom"
-              >
-                <i className="bi bi-cake2 me-2" style={{ color: '#CD853F' }}></i>
-                الحلويات
-              </NavDropdown.Item>
-              <NavDropdown.Item
-                as={Link}
-                to="/hookah"
-                onClick={() => setExpanded(false)}
-                className="dropdown-item-custom"
-              >
-                <i className="bi bi-cloud me-2" style={{ color: '#D2B48C' }}></i>
-                الأراكيل
-              </NavDropdown.Item>
-              <NavDropdown.Divider />
-              <NavDropdown.Item
-                as={Link}
-                to="/special-images"
-                onClick={() => setExpanded(false)}
-                className="dropdown-item-custom"
-              >
-                <i className="bi bi-images me-2" style={{ color: '#8B5E3C' }}></i>
-                الصور الخاصة
-              </NavDropdown.Item>
-            </NavDropdown>
+                <NavDropdown.Item
+                  as={Link}
+                  to="/foods"
+                  onClick={() => setExpanded(false)}
+                  className="dropdown-item-custom"
+                >
+                  <i className="bi bi-egg-fried me-2" style={{ color: '#6B4226' }}></i>
+                  الأطعمة
+                </NavDropdown.Item>
+                <NavDropdown.Item
+                  as={Link}
+                  to="/drinks"
+                  onClick={() => setExpanded(false)}
+                  className="dropdown-item-custom"
+                >
+                  <i className="bi bi-cup-straw me-2" style={{ color: '#8B5E3C' }}></i>
+                  المشروبات
+                </NavDropdown.Item>
+                <NavDropdown.Item
+                  as={Link}
+                  to="/desserts"
+                  onClick={() => setExpanded(false)}
+                  className="dropdown-item-custom"
+                >
+                  <i className="bi bi-cake2 me-2" style={{ color: '#CD853F' }}></i>
+                  الحلويات
+                </NavDropdown.Item>
+                <NavDropdown.Item
+                  as={Link}
+                  to="/hookah"
+                  onClick={() => setExpanded(false)}
+                  className="dropdown-item-custom"
+                >
+                  <i className="bi bi-cloud me-2" style={{ color: '#D2B48C' }}></i>
+                  الأراكيل
+                </NavDropdown.Item>
+                <NavDropdown.Divider />
+                <NavDropdown.Item
+                  as={Link}
+                  to="/special-images"
+                  onClick={() => setExpanded(false)}
+                  className="dropdown-item-custom"
+                >
+                  <i className="bi bi-images me-2" style={{ color: '#8B5E3C' }}></i>
+                  الصور الخاصة
+                </NavDropdown.Item>
+              </NavDropdown>
+            )}
 
             <Nav.Link
               as={Link}
@@ -133,15 +137,17 @@ export default function NavBar() {
               إدارة الطاولات
             </Nav.Link>
 
-            <Nav.Link
-              as={Link}
-              to="/order-logs"
-              onClick={() => setExpanded(false)}
-              className="fw-semibold nav-link-custom"
-            >
-              <i className="bi bi-journal-text me-2" style={{ color: '#8B5E3C' }}></i>
-              سجل الطلبات
-            </Nav.Link>
+            {user?.role !== 'staff' && (
+              <Nav.Link
+                as={Link}
+                to="/order-logs"
+                onClick={() => setExpanded(false)}
+                className="fw-semibold nav-link-custom"
+              >
+                <i className="bi bi-journal-text me-2" style={{ color: '#8B5E3C' }}></i>
+                سجل الطلبات
+              </Nav.Link>
+            )}
             {user?.role === 'admin' && (
               <Nav.Link
                 as={Link}

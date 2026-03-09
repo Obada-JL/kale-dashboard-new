@@ -11,6 +11,7 @@ const DessertsPage = () => {
     const [newCategory, setNewCategory] = useState('');
     const [newProduct, setNewProduct] = useState({
         name: '',
+        nameTr: '',
         price: '',
         category: '',
         description: ''
@@ -90,6 +91,7 @@ const DessertsPage = () => {
             await apiService.desserts.add(newProduct);
             setNewProduct({
                 name: '',
+                nameTr: '',
                 price: '',
                 category: '',
                 description: ''
@@ -237,7 +239,7 @@ const DessertsPage = () => {
 
     const filteredProducts = products.filter(product => {
         // Compare using category ObjectId (handle both string and object)
-        const productCategoryId = typeof product.category === 'object' ? product.category._id : product.category;
+        const productCategoryId = (typeof product.category === 'object' && product.category !== null) ? product.category._id : product.category;
         const matchesCategory = selectedCategory ? productCategoryId === selectedCategory : true;
         const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
         return matchesCategory && matchesSearch;
@@ -246,7 +248,7 @@ const DessertsPage = () => {
     const filteredImages = selectedCategory
         // Compare using category ObjectId (handle both string and object)
         ? images.filter(image => {
-            const imageCategoryId = typeof image.category === 'object' ? image.category._id : image.category;
+            const imageCategoryId = (typeof image.category === 'object' && image.category !== null) ? image.category._id : image.category;
             return imageCategoryId === selectedCategory;
         })
         : images;
@@ -473,6 +475,7 @@ const DessertsPage = () => {
                                     <thead className="table-light">
                                         <tr>
                                             <th className="fw-semibold">الاسم</th>
+                                            <th className="fw-semibold">الاسم بالتركية</th>
                                             <th className="fw-semibold">الفئة</th>
                                             <th className="fw-semibold">السعر</th>
                                             <th className="fw-semibold text-center">الإجراءات</th>
@@ -482,6 +485,7 @@ const DessertsPage = () => {
                                         {filteredProducts.map((product) => (
                                             <tr key={product._id}>
                                                 <td className="fw-semibold">{product.name}</td>
+                                                <td className="text-muted">{product.nameTr || '—'}</td>
                                                 <td>
                                                     <span className="badge bg-warning">
                                                         {getCategoryName(product.category)}
@@ -567,7 +571,7 @@ const DessertsPage = () => {
                                         <div key={image._id} className="col-6">
                                             <div className="position-relative">
                                                 <img
-                                                    src={`http://localhost:5000/uploads/${image.imagePath}`}
+                                                    src={`https://kale-cafe.com/uploads/${image.imagePath}`}
                                                     alt="Dessert"
                                                     className="img-fluid rounded shadow-sm"
                                                     style={{ height: '100px', width: '100%', objectFit: 'cover' }}
@@ -661,6 +665,17 @@ const DessertsPage = () => {
                                             />
                                         </div>
                                         <div className="col-md-6">
+                                            <label className="form-label fw-semibold">الاسم بالتركية</label>
+                                            <input
+                                                type="text"
+                                                value={newProduct.nameTr}
+                                                onChange={(e) => setNewProduct({ ...newProduct, nameTr: e.target.value })}
+                                                className="form-control"
+                                                placeholder="Örn: Çikolatalı kek, Baklava..."
+                                                disabled={isLoading}
+                                            />
+                                        </div>
+                                        <div className="col-md-6">
                                             <label className="form-label fw-semibold">السعر (ليرة)</label>
                                             <input
                                                 type="number"
@@ -727,6 +742,17 @@ const DessertsPage = () => {
                                                 onChange={(e) => setEditingProduct({ ...editingProduct, name: e.target.value })}
                                                 className="form-control"
                                                 required
+                                                disabled={isLoading}
+                                            />
+                                        </div>
+                                        <div className="col-md-6">
+                                            <label className="form-label fw-semibold">الاسم بالتركية</label>
+                                            <input
+                                                type="text"
+                                                value={editingProduct.nameTr || ''}
+                                                onChange={(e) => setEditingProduct({ ...editingProduct, nameTr: e.target.value })}
+                                                className="form-control"
+                                                placeholder="Türkçe isim"
                                                 disabled={isLoading}
                                             />
                                         </div>

@@ -141,6 +141,8 @@
   border-radius: 10px;
   margin: 0 4px;
   padding: 8px 12px !important;
+  display: flex;
+  gap: 8px;
 }
 
 .nav-link-custom:hover {
