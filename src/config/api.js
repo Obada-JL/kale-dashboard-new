@@ -113,6 +113,11 @@ export const API_ENDPOINTS = {
     UPDATE_STATUS: (id) => `/api/orders/${id}/status`,
     DELETE: (id) => `/api/orders/${id}`,
   },
+  
+  // Printing
+  PRINT: {
+    RECEIPT: '/api/print',
+  }
 };
 
 export default API_BASE_URL; 

@@ -313,6 +313,15 @@ const TablesPage = () => {
         );
     };
 
+    const handlePrintReceipt = async (order) => {
+        try {
+            await apiService.print.receipt(order);
+            toast.success('تم إرسال الفاتورة إلى الطابعة بنجاح');
+        } catch (error) {
+            handleApiError(error, 'طباعة الفاتورة');
+        }
+    };
+
     const getOrderStatusBadge = (status) => {
         const map = {
             active: { label: 'نشط', bg: '#6B4226' },
@@ -1203,7 +1212,12 @@ const TablesPage = () => {
                                     <i className="bi bi-receipt me-2"></i>
                                     تفاصيل الطلب - طاولة {viewingOrder.table?.number || '?'}
                                 </h5>
-                                <button onClick={() => setViewingOrder(null)} className="btn-close"></button>
+                                <div className="d-flex align-items-center gap-2">
+                                    <button onClick={() => handlePrintReceipt(viewingOrder)} className="btn btn-sm btn-outline-secondary d-print-none" title="طباعة الفاتورة">
+                                        <i className="bi bi-printer"></i>
+                                    </button>
+                                    <button onClick={() => setViewingOrder(null)} className="btn-close d-print-none"></button>
+                                </div>
                             </div>
                             <div className="modal-body p-4" style={{ backgroundColor: '#FDF8F3' }}>
                                 <div className="mb-4">
@@ -1245,12 +1259,65 @@ const TablesPage = () => {
                                     <span className="fw-bold fs-4">{(viewingOrder.totalAmount || 0).toLocaleString()} ل.ت</span>
                                 </div>
                             </div>
-                            <div className="modal-footer border-0 pt-0" style={{ backgroundColor: '#FDF8F3' }}>
+                            <div className="modal-footer border-0 pt-0 d-print-none" style={{ backgroundColor: '#FDF8F3' }}>
                                 <button onClick={() => setViewingOrder(null)} className="btn px-4 fw-bold" style={{ backgroundColor: '#4A2E1A', color: '#fff', borderRadius: '10px' }}>
                                     إغلاق النافذة
                                 </button>
                             </div>
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Printable Receipt (Hidden from screen, absolute positioned in print) */}
+            {viewingOrder && (
+                <div id="receipt-printable" className="d-none d-print-block bg-white p-3 text-dark">
+                    <div className="text-center mb-3">
+                        <h4 className="fw-bold mb-1">Kale Cafe</h4>
+                        <div className="mt-2 fw-bold" style={{ fontSize: '1.2rem', borderTop: '1px dashed #000', borderBottom: '1px dashed #000', padding: '5px 0' }}>
+                            طاولة {viewingOrder.table?.number || '?'}
+                        </div>
+                    </div>
+                    
+                    <div className="d-flex justify-content-between mb-2 pb-2" style={{ borderBottom: '1px solid #ddd', fontSize: '0.85rem' }}>
+                        <span>{new Date(viewingOrder.createdAt).toLocaleDateString('ar-SA', { year: 'numeric', month: 'short', day: 'numeric' })}</span>
+                        <span>{new Date(viewingOrder.createdAt).toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' })}</span>
+                    </div>
+
+                    <div className="mb-3">
+                        <table className="w-100" style={{ fontSize: '0.9rem' }}>
+                            <thead>
+                                <tr style={{ borderBottom: '1px solid #000' }}>
+                                    <th className="text-end pb-1">الصنف</th>
+                                    <th className="text-center pb-1">الكمية</th>
+                                    <th className="text-start pb-1">السعر</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {viewingOrder.items?.map((item, idx) => (
+                                    <tr key={idx}>
+                                        <td className="text-end py-1">{item.name}</td>
+                                        <td className="text-center py-1">{item.quantity}</td>
+                                        <td className="text-start py-1">{(item.price * item.quantity).toLocaleString()}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {viewingOrder.notes && (
+                        <div className="mb-3" style={{ fontSize: '0.85rem' }}>
+                            <strong>ملاحظات:</strong> {viewingOrder.notes}
+                        </div>
+                    )}
+
+                    <div className="d-flex justify-content-between pt-2 fw-bold" style={{ borderTop: '2px dashed #000', fontSize: '1.2rem' }}>
+                        <span>الإجمالي:</span>
+                        <span>{(viewingOrder.totalAmount || 0).toLocaleString()} ل.ت</span>
+                    </div>
+                    
+                    <div className="text-center mt-4 pb-2" style={{ fontSize: '0.8rem' }}>
+                        شكراً لزيارتكم!
                     </div>
                 </div>
             )}

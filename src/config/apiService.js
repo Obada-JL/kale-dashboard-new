@@ -170,6 +170,11 @@ export const apiService = {
     updateStatus: (id, status) => apiClient.put(API_ENDPOINTS.ORDERS.UPDATE_STATUS(id), { status }),
     delete: (id) => apiClient.delete(API_ENDPOINTS.ORDERS.DELETE(id)),
   },
+
+  // Print
+  print: {
+    receipt: (data) => apiClient.post(API_ENDPOINTS.PRINT.RECEIPT, data),
+  },
 };
 
 // Utility functions

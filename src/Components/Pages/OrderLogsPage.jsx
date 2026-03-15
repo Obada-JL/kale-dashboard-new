@@ -40,6 +40,15 @@ const OrderLogsPage = () => {
         fetchLogs(page);
     };
 
+    const handlePrintReceipt = async (order) => {
+        try {
+            await apiService.print.receipt(order);
+            toast.success('تم إرسال الفاتورة إلى الطابعة بنجاح');
+        } catch (error) {
+            handleApiError(error, 'طباعة الفاتورة');
+        }
+    };
+
     const getStatusBadge = (status) => {
         const map = {
             active: { label: 'نشط', bg: '#6B4226', icon: 'bi-hourglass-split' },
@@ -352,9 +361,14 @@ const OrderLogsPage = () => {
                                     </span>
                                     {getStatusBadge(viewingOrder.status)}
                                 </h5>
-                                <button onClick={() => setViewingOrder(null)} className="btn btn-sm btn-outline-danger">
-                                    <i className="bi bi-x-lg"></i>
-                                </button>
+                                <div className="d-flex gap-2">
+                                    <button onClick={() => handlePrintReceipt(viewingOrder)} className="btn btn-sm btn-outline-secondary d-print-none" title="طباعة الفاتورة">
+                                        <i className="bi bi-printer"></i>
+                                    </button>
+                                    <button onClick={() => setViewingOrder(null)} className="btn btn-sm btn-outline-danger d-print-none">
+                                        <i className="bi bi-x-lg"></i>
+                                    </button>
+                                </div>
                             </div>
                             <div className="modal-body">
                                 {/* Order info */}
@@ -410,6 +424,59 @@ const OrderLogsPage = () => {
                                 </div>
                             </div>
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Printable Receipt (Hidden from screen, absolute positioned in print) */}
+            {viewingOrder && (
+                <div id="receipt-printable" className="d-none d-print-block bg-white p-3 text-dark">
+                    <div className="text-center mb-3">
+                        <h4 className="fw-bold mb-1">Kale Cafe</h4>
+                        <div className="mt-2 fw-bold" style={{ fontSize: '1.2rem', borderTop: '1px dashed #000', borderBottom: '1px dashed #000', padding: '5px 0' }}>
+                            طاولة {viewingOrder.table?.number || '?'}
+                        </div>
+                    </div>
+                    
+                    <div className="d-flex justify-content-between mb-2 pb-2" style={{ borderBottom: '1px solid #ddd', fontSize: '0.85rem' }}>
+                        <span>{formatDate(viewingOrder.createdAt)}</span>
+                        <span>{formatTime(viewingOrder.createdAt)}</span>
+                    </div>
+
+                    <div className="mb-3">
+                        <table className="w-100" style={{ fontSize: '0.9rem' }}>
+                            <thead>
+                                <tr style={{ borderBottom: '1px solid #000' }}>
+                                    <th className="text-end pb-1">الصنف</th>
+                                    <th className="text-center pb-1">الكمية</th>
+                                    <th className="text-start pb-1">السعر</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {viewingOrder.items?.map((item, idx) => (
+                                    <tr key={idx}>
+                                        <td className="text-end py-1">{item.name}</td>
+                                        <td className="text-center py-1">{item.quantity}</td>
+                                        <td className="text-start py-1">{(item.price * item.quantity).toLocaleString()}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {viewingOrder.notes && (
+                        <div className="mb-3" style={{ fontSize: '0.85rem' }}>
+                            <strong>ملاحظات:</strong> {viewingOrder.notes}
+                        </div>
+                    )}
+
+                    <div className="d-flex justify-content-between pt-2 fw-bold" style={{ borderTop: '2px dashed #000', fontSize: '1.2rem' }}>
+                        <span>الإجمالي:</span>
+                        <span>{(viewingOrder.totalAmount || 0).toLocaleString()} ل.ت</span>
+                    </div>
+                    
+                    <div className="text-center mt-4 pb-2" style={{ fontSize: '0.8rem' }}>
+                        شكراً لزيارتكم!
                     </div>
                 </div>
             )}
