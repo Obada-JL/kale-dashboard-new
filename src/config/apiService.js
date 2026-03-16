@@ -167,7 +167,7 @@ export const apiService = {
     getByTable: (tableId) => apiClient.get(API_ENDPOINTS.ORDERS.GET_BY_TABLE(tableId)),
     add: (data) => apiClient.post(API_ENDPOINTS.ORDERS.ADD, data),
     update: (id, data) => apiClient.put(API_ENDPOINTS.ORDERS.UPDATE(id), data),
-    updateStatus: (id, status) => apiClient.put(API_ENDPOINTS.ORDERS.UPDATE_STATUS(id), { status }),
+    updateStatus: (id, status, paymentMethod) => apiClient.put(API_ENDPOINTS.ORDERS.UPDATE_STATUS(id), { status, paymentMethod }),
     delete: (id) => apiClient.delete(API_ENDPOINTS.ORDERS.DELETE(id)),
   },
 

@@ -16,6 +16,8 @@ const TablesPage = () => {
     const [showOrderModal, setShowOrderModal] = useState(false);
     const [viewingOrder, setViewingOrder] = useState(null);
     const { user } = useAuth();
+    const isStaff = user?.role === 'staff';
+
     const confirm = useConfirm();
 
     // Menu data from database
@@ -42,6 +44,9 @@ const TablesPage = () => {
     const [editingOrderId, setEditingOrderId] = useState(null);
     const [filterStatus, setFilterStatus] = useState('all');
     const [pageTab, setPageTab] = useState('tables');
+    const [orderType, setOrderType] = useState('table');
+    const [paymentMethod, setPaymentMethod] = useState('cash');
+    const [printLang, setPrintLang] = useState('ar');
 
     useEffect(() => {
         fetchTables();
@@ -151,6 +156,8 @@ const TablesPage = () => {
 
     const handleTableClick = async (table) => {
         setSelectedTable(table);
+        setOrderType('table'); // Default to table for table clicks
+        setPaymentMethod('cash');
         setOrderItems([]);
         setOrderNotes('');
         setEditingOrderId(null);
@@ -163,8 +170,12 @@ const TablesPage = () => {
             const activeOrder = (ordersRes || tableOrders).find(o => o.status === 'active');
             if (activeOrder) {
                 setEditingOrderId(activeOrder._id);
+                setOrderType(activeOrder.orderType || 'table');
+                setPaymentMethod(activeOrder.paymentMethod || 'cash');
+                console.log(activeOrder);
                 setOrderItems(activeOrder.items?.map(item => ({
                     name: item.name,
+                    nameTr: item.nameTr || '',
                     price: item.price,
                     quantity: item.quantity,
                     notes: item.notes || ''
@@ -172,6 +183,18 @@ const TablesPage = () => {
                 setOrderNotes(activeOrder.notes || '');
             }
         }
+        setShowOrderModal(true);
+    };
+
+    const handleDeliveryOrderClick = () => {
+        setSelectedTable(null);
+        setOrderType('delivery');
+        setPaymentMethod('cash');
+        setOrderItems([]);
+        setOrderNotes('');
+        setEditingOrderId(null);
+        setMenuSearch('');
+        setActiveMenuTab('foods');
         setShowOrderModal(true);
     };
 
@@ -183,8 +206,10 @@ const TablesPage = () => {
             updated[existingIndex].quantity += 1;
             setOrderItems(updated);
         } else {
+            console.log(item);
             setOrderItems([...orderItems, {
                 name: item.name,
+                nameTr: item.nameTr || '',
                 price: item.price,
                 quantity: 1,
                 notes: ''
@@ -216,8 +241,10 @@ const TablesPage = () => {
         }
         try {
             setIsLoading(true);
+            console.log(orderItems);
             const itemsPayload = orderItems.map(item => ({
                 name: item.name,
+                nameTr: item.nameTr || '',
                 price: Number(item.price),
                 quantity: Number(item.quantity),
                 notes: item.notes || ''
@@ -228,15 +255,19 @@ const TablesPage = () => {
                 await apiService.orders.update(editingOrderId, {
                     items: itemsPayload,
                     notes: orderNotes,
+                    orderType,
+                    paymentMethod
                 });
                 toast.success('تم تحديث الطلب بنجاح');
             } else {
                 // Create new order
                 await apiService.orders.add({
-                    table: selectedTable._id,
+                    table: selectedTable?._id || null,
                     items: itemsPayload,
                     notes: orderNotes,
-                    createdBy: user?.username || ''
+                    createdBy: user?.username || '',
+                    orderType,
+                    paymentMethod
                 });
                 toast.success('تم إنشاء الطلب بنجاح');
             }
@@ -245,7 +276,10 @@ const TablesPage = () => {
             setEditingOrderId(null);
             await fetchTables();
             await fetchOrders();
-            await fetchTableOrders(selectedTable._id);
+            if (selectedTable) {
+                await fetchTableOrders(selectedTable._id);
+            }
+            setShowOrderModal(false); // Close modal after successful order
         } catch (error) {
             handleApiError(error, editingOrderId ? 'تحديث طلب' : 'إنشاء طلب');
         } finally {
@@ -253,7 +287,7 @@ const TablesPage = () => {
         }
     };
 
-    const handleOrderStatus = async (orderId, status) => {
+    const handleOrderStatus = async (orderId, status, pMethod) => {
         const msg = status === 'completed' ? 'إكمال' : 'إلغاء';
         const confirmed = await confirm({
             title: `${msg} الطلب`,
@@ -264,7 +298,7 @@ const TablesPage = () => {
         if (!confirmed) return;
         try {
             setIsLoading(true);
-            await apiService.orders.updateStatus(orderId, status);
+            await apiService.orders.updateStatus(orderId, status, pMethod);
             await fetchTables();
             await fetchOrders();
             if (selectedTable) await fetchTableOrders(selectedTable._id);
@@ -313,9 +347,9 @@ const TablesPage = () => {
         );
     };
 
-    const handlePrintReceipt = async (order) => {
+    const handlePrintReceipt = async (order, lang = 'ar') => {
         try {
-            await apiService.print.receipt(order);
+            await apiService.print.receipt({ ...order, lang });
             toast.success('تم إرسال الفاتورة إلى الطابعة بنجاح');
         } catch (error) {
             handleApiError(error, 'طباعة الفاتورة');
@@ -495,15 +529,29 @@ const TablesPage = () => {
                                     إجمالي الطلبات النشطة: {totalOrdersAmount.toLocaleString()} ل.ت
                                 </span>
                             )} */}
-                                                    <button
-                            onClick={() => setShowAddTable(true)}
-                            className="btn text-white px-4 d-flex gap-1"
-                            style={{ background: 'linear-gradient(135deg, #6B4226 0%, #CD853F 100%)', borderRadius: '10px' }}
-                            disabled={isLoading}
-                        >
-                            <i className="bi bi-plus-circle me-2"></i>
-                            إضافة طاولة
-                        </button>
+                        <div className="d-flex align-items-center gap-2">
+                            <button
+                                onClick={handleDeliveryOrderClick}
+                                className="btn text-white px-4 d-flex gap-1"
+                                style={{ background: 'linear-gradient(135deg, #8B5E3C 0%, #CD853F 100%)', borderRadius: '10px' }}
+                                disabled={isLoading}
+                            >
+                                <i className="bi bi-bicycle me-2"></i>
+                                طلب سفري
+                            </button>
+                            {!isStaff && (
+                                <button
+                                    onClick={() => setShowAddTable(true)}
+                                    className="btn text-white px-4 d-flex gap-1"
+                                    style={{ background: 'linear-gradient(135deg, #6B4226 0%, #CD853F 100%)', borderRadius: '10px' }}
+                                    disabled={isLoading}
+                                >
+                                    <i className="bi bi-plus-circle me-2"></i>
+                                    إضافة طاولة
+                                </button>
+                            )}
+
+                        </div>
                         </div>
                         <div className="card-body">
                             {filteredTables.length > 0 ? (
@@ -593,33 +641,34 @@ const TablesPage = () => {
                                                             </div>
                                                         )}
 
-                                                        {/* Action buttons */}
-                                                        <div className="d-flex justify-content-center gap-2 mt-auto pt-1">
-                                                            <button className="btn btn-sm d-flex align-items-center justify-content-center"
-                                                                style={{
-                                                                    width: '30px', height: '30px', borderRadius: '8px',
-                                                                    backgroundColor: 'rgba(107,66,38,0.06)', border: '1px solid rgba(107,66,38,0.1)',
-                                                                    color: '#6B4226', fontSize: '0.75rem', transition: 'all 0.2s ease',
-                                                                }}
-                                                                onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#6B4226'; e.currentTarget.style.color = '#fff'; }}
-                                                                onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'rgba(107,66,38,0.06)'; e.currentTarget.style.color = '#6B4226'; }}
-                                                                onClick={(e) => { e.stopPropagation(); setEditingTable({ ...table }); }}
-                                                                disabled={isLoading}>
-                                                                <i className="bi bi-pencil-fill"></i>
-                                                            </button>
-                                                            <button className="btn btn-sm d-flex align-items-center justify-content-center"
-                                                                style={{
-                                                                    width: '30px', height: '30px', borderRadius: '8px',
-                                                                    backgroundColor: 'rgba(220,53,69,0.06)', border: '1px solid rgba(220,53,69,0.12)',
-                                                                    color: '#dc3545', fontSize: '0.75rem', transition: 'all 0.2s ease',
-                                                                }}
-                                                                onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#dc3545'; e.currentTarget.style.color = '#fff'; }}
-                                                                onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'rgba(220,53,69,0.06)'; e.currentTarget.style.color = '#dc3545'; }}
-                                                                onClick={(e) => { e.stopPropagation(); handleDeleteTable(table._id); }}
-                                                                disabled={isLoading}>
-                                                                <i className="bi bi-trash-fill"></i>
-                                                            </button>
-                                                        </div>
+                                                        {!isStaff && (
+                                                            <div className="d-flex justify-content-center gap-2 mt-auto pt-1">
+                                                                <button className="btn btn-sm d-flex align-items-center justify-content-center"
+                                                                    style={{
+                                                                        width: '30px', height: '30px', borderRadius: '8px',
+                                                                        backgroundColor: 'rgba(107,66,38,0.06)', border: '1px solid rgba(107,66,38,0.1)',
+                                                                        color: '#6B4226', fontSize: '0.75rem', transition: 'all 0.2s ease',
+                                                                    }}
+                                                                    onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#6B4226'; e.currentTarget.style.color = '#fff'; }}
+                                                                    onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'rgba(107,66,38,0.06)'; e.currentTarget.style.color = '#6B4226'; }}
+                                                                    onClick={(e) => { e.stopPropagation(); setEditingTable({ ...table }); }}
+                                                                    disabled={isLoading}>
+                                                                    <i className="bi bi-pencil-fill"></i>
+                                                                </button>
+                                                                <button className="btn btn-sm d-flex align-items-center justify-content-center"
+                                                                    style={{
+                                                                        width: '30px', height: '30px', borderRadius: '8px',
+                                                                        backgroundColor: 'rgba(220,53,69,0.06)', border: '1px solid rgba(220,53,69,0.12)',
+                                                                        color: '#dc3545', fontSize: '0.75rem', transition: 'all 0.2s ease',
+                                                                    }}
+                                                                    onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#dc3545'; e.currentTarget.style.color = '#fff'; }}
+                                                                    onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'rgba(220,53,69,0.06)'; e.currentTarget.style.color = '#dc3545'; }}
+                                                                    onClick={(e) => { e.stopPropagation(); handleDeleteTable(table._id); }}
+                                                                    disabled={isLoading}>
+                                                                    <i className="bi bi-trash-fill"></i>
+                                                                </button>
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 </div>
                                             </div>
@@ -666,8 +715,8 @@ const TablesPage = () => {
                                             {orders.map(order => (
                                                 <tr key={order._id}>
                                                     <td>
-                                                        <span className="badge" style={{ backgroundColor: '#6B4226' }}>
-                                                            طاولة {order.table?.number || '?'}
+                                                        <span className="badge" style={{ backgroundColor: order.orderType === 'delivery' ? '#CD853F' : '#6B4226' }}>
+                                                            {order.orderType === 'delivery' ? 'سفري' : `طاولة ${order.table?.number || '?'}`}
                                                         </span>
                                                     </td>
                                                     <td>
@@ -686,19 +735,39 @@ const TablesPage = () => {
                                                     <td><small className="text-muted">{order.createdBy || '-'}</small></td>
                                                     <td><small className="text-muted">{new Date(order.createdAt).toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' })}</small></td>
                                                     <td className="text-center">
-                                                        <div className="d-flex gap-2">
-                                                            <button className="btn btn-sm text-white d-flex gap-1"
-                                                                style={{ backgroundColor: '#4A2E1A', fontSize: '0.75rem' }}
-                                                                onClick={() => handleOrderStatus(order._id, 'completed')}
+                                                        <div className="d-flex gap-1 justify-content-center">
+                                                            <button className="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1"
+                                                                style={{ fontSize: '0.7rem', padding: '0.2rem 0.4rem' }}
+                                                                onClick={() => handlePrintReceipt(order, 'ar')}
+                                                                title="طباعة عربي"
                                                                 disabled={isLoading}>
-                                                                <i className="bi bi-check-lg me-1"></i>إكمال
+                                                                <i className="bi bi-printer"></i>AR
                                                             </button>
-                                                            <button className="btn btn-sm btn-outline-danger d-flex gap-1"
-                                                                style={{ fontSize: '0.75rem' }}
-                                                                onClick={() => handleOrderStatus(order._id, 'cancelled')}
+                                                            <button className="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1"
+                                                                style={{ fontSize: '0.7rem', padding: '0.2rem 0.4rem' }}
+                                                                onClick={() => handlePrintReceipt(order, 'tr')}
+                                                                title="Türkçe Yazdır"
                                                                 disabled={isLoading}>
-                                                                <i className="bi bi-x-lg me-1"></i>إلغاء
+                                                                <i className="bi bi-printer"></i>TR
                                                             </button>
+                                                            <div className="vr mx-1"></div>
+                                                            {!isStaff && (
+                                                                <>
+                                                                    <button className="btn btn-sm text-white d-flex align-items-center gap-1"
+                                                                        style={{ backgroundColor: '#4A2E1A', fontSize: '0.75rem' }}
+                                                                        onClick={() => handleOrderStatus(order._id, 'completed', order.paymentMethod)}
+                                                                        disabled={isLoading}>
+                                                                        <i className="bi bi-check-lg"></i>إكمال
+                                                                    </button>
+                                                                    <button className="btn btn-sm btn-outline-danger d-flex align-items-center gap-1"
+                                                                        style={{ fontSize: '0.75rem' }}
+                                                                        onClick={() => handleOrderStatus(order._id, 'cancelled')}
+                                                                        disabled={isLoading}>
+                                                                        <i className="bi bi-x-lg"></i>إلغاء
+                                                                    </button>
+                                                                </>
+                                                            )}
+
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -779,9 +848,9 @@ const TablesPage = () => {
                 <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
                     <div className="modal-dialog modal-dialog-centered">
                         <div className="modal-content">
-                            <div className="modal-header">
+                            <div className="modal-header d-flex justify-content-between">
                                 <h5 className="modal-title"><i className="bi bi-pencil me-2"></i>تعديل طاولة {editingTable.number}</h5>
-                                <button onClick={() => setEditingTable(null)} className="btn-close"></button>
+                                <button onClick={() => setEditingTable(null)} className="btn btn-danger"><FiX /></button>
                             </div>
                             <form onSubmit={handleUpdateTable}>
                                 <div className="modal-body">
@@ -832,19 +901,19 @@ const TablesPage = () => {
             )}
 
             {/* Order Modal (Table Details + Menu Browser) */}
-            {showOrderModal && selectedTable && (
+            {showOrderModal && (
                 <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
                     <div className="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable ">
                         <div className="modal-content" style={{ maxHeight: '92vh', width: '100%' }}>
                             <div className="modal-header d-flex justify-content-between align-items-center w-100" style={{ background: 'linear-gradient(135deg, #F5EDE3, #ece0d4)' }}>
                                 <h5 className="gap-3 d-flex align-items-center mb-0" style={{ color: '#4A2E1A' }}>
                                   <div className="d-flex align-items-center gap-2">
-                                    <i className="bi bi-grid-1x2 me-2"></i>
+                                    <i className={`bi ${orderType === 'delivery' ? 'bi-bicycle' : 'bi-grid-1x2'} me-2`}></i>
                                     <span style={{ whiteSpace: "nowrap" }}>
-                                      طاولة {selectedTable.number}
+                                      {orderType === 'delivery' ? 'طلب سفري' : `طاولة ${selectedTable?.number}`}
                                     </span>
                                   </div>         
-                                  <span className="ms-2">{getStatusBadge(selectedTable.status)}</span>
+                                  {selectedTable && <span className="ms-2">{getStatusBadge(selectedTable.status)}</span>}
                                 </h5>
                                 <div className="d-flex align-items-end justify-content-end w-100">
                                 <button onClick={() => { setShowOrderModal(false); setSelectedTable(null); }} className="btn btn-danger"> <FiX/></button>
@@ -952,6 +1021,11 @@ const TablesPage = () => {
                                                                             <div>
                                                                                 <span className="fw-semibold" style={{ fontSize: '0.9rem', color: '#4A2E1A' }}>
                                                                                     {item.name}
+                                                                                    {item.nameTr && (
+                                                                                        <div className="text-muted" style={{ fontSize: '0.75rem', fontWeight: 'normal' }}>
+                                                                                            {item.nameTr}
+                                                                                        </div>
+                                                                                    )}
                                                                                 </span>
                                                                                 {inOrder && (
                                                                                     <span className="badge ms-2" style={{ backgroundColor: '#6B4226', fontSize: '0.65rem' }}>
@@ -1050,14 +1124,48 @@ const TablesPage = () => {
                                                 )}
                                             </h6>
 
+                                            {/* Order Details: Payment Method Only (Order Type is automatic) */}
+                                            <div className="row g-2 mb-3">
+                                                <div className="col-12">
+                                                    <label className="form-label small fw-bold mb-1">طريقة الدفع</label>
+                                                    <div className="d-flex gap-2">
+                                                        <button 
+                                                            type="button"
+                                                            className={`btn btn-sm flex-grow-1 d-flex align-items-center justify-content-center gap-2 ${paymentMethod === 'cash' ? 'btn-dark' : 'btn-outline-dark'}`}
+                                                            onClick={() => setPaymentMethod('cash')}
+                                                            style={{ borderRadius: '8px', py: '10px' }}
+                                                        >
+                                                            <i className="bi bi-cash"></i>
+                                                            نقداً
+                                                        </button>
+                                                        <button 
+                                                            type="button"
+                                                            className={`btn btn-sm flex-grow-1 d-flex align-items-center justify-content-center gap-2 ${paymentMethod === 'credit_card' ? 'btn-dark' : 'btn-outline-dark'}`}
+                                                            onClick={() => setPaymentMethod('credit_card')}
+                                                            style={{ borderRadius: '8px', py: '10px' }}
+                                                        >
+                                                            <i className="bi bi-credit-card"></i>
+                                                            بطاقة
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+
                                             {orderItems.length > 0 ? (
                                                 <div className="mb-3" style={{ maxHeight: '25vh', overflowY: 'auto' }}>
                                                     {orderItems.map((item, index) => (
                                                         <div key={index} className="d-flex align-items-center justify-content-between py-2 px-3 mb-1 rounded-3"
                                                             style={{ backgroundColor: 'rgba(107,66,38,0.03)', border: '1px solid rgba(107,66,38,0.08)' }}>
                                                             <div className="flex-grow-1">
-                                                                <div className="fw-semibold" style={{ fontSize: '0.85rem', color: '#4A2E1A' }}>{item.name}</div>
-                                                                <small className="text-muted">{Number(item.price).toLocaleString()} ل.ت للوحدة</small>
+                                                                <div className="fw-semibold" style={{ fontSize: '0.85rem', color: '#4A2E1A' }}>
+                                                                    {item.name}
+                                                                    {item.nameTr && (
+                                                                        <span className="text-muted ms-2" style={{ fontSize: '0.75rem', fontWeight: 'normal' }}>
+                                                                            ({item.nameTr})
+                                                                        </span>
+                                                                    )}
+                                                                </div>
+                                                                <small className="text-muted">{Number(item.price).toLocaleString()} ل.ت </small>
                                                                 <input
                                                                     type="text"
                                                                     className="form-control form-control-sm mt-1"
@@ -1148,21 +1256,38 @@ const TablesPage = () => {
                                                                             {(order.totalAmount || 0).toLocaleString()} ل.ت
                                                                         </div>
                                                                         <div className="btn-group">
-                                                                            <button className="btn btn-sm text-white"
-                                                                                style={{ backgroundColor: '#4A2E1A', fontSize: '0.65rem', padding: '1px 6px' }}
-                                                                                onClick={() => handleOrderStatus(order._id, 'completed')}>
-                                                                                <i className="bi bi-check-lg"></i>
-                                                                            </button>
-                                                                            <button className="btn btn-sm btn-outline-danger"
+                                                                            <button className="btn btn-sm btn-outline-secondary"
                                                                                 style={{ fontSize: '0.65rem', padding: '1px 6px' }}
-                                                                                onClick={() => handleOrderStatus(order._id, 'cancelled')}>
-                                                                                <i className="bi bi-x-lg"></i>
+                                                                                onClick={() => handlePrintReceipt(order, 'ar')}
+                                                                                title="طباعة عربي">
+                                                                                <i className="bi bi-printer"></i> AR
                                                                             </button>
                                                                             <button className="btn btn-sm btn-outline-secondary"
                                                                                 style={{ fontSize: '0.65rem', padding: '1px 6px' }}
-                                                                                onClick={() => handleDeleteOrder(order._id)}>
-                                                                                <i className="bi bi-trash"></i>
+                                                                                onClick={() => handlePrintReceipt(order, 'tr')}
+                                                                                title="Türkçe Yazdır">
+                                                                                <i className="bi bi-printer"></i> TR
                                                                             </button>
+                                                                            {!isStaff && (
+                                                                                <>
+                                                                                    <button className="btn btn-sm text-white"
+                                                                                        style={{ backgroundColor: '#4A2E1A', fontSize: '0.65rem', padding: '1px 6px' }}
+                                                                                        onClick={() => handleOrderStatus(order._id, 'completed', paymentMethod)}>
+                                                                                        <i className="bi bi-check-lg"></i>
+                                                                                    </button>
+                                                                                    <button className="btn btn-sm btn-outline-danger"
+                                                                                        style={{ fontSize: '0.65rem', padding: '1px 6px' }}
+                                                                                        onClick={() => handleOrderStatus(order._id, 'cancelled')}>
+                                                                                        <i className="bi bi-x-lg"></i>
+                                                                                    </button>
+                                                                                    <button className="btn btn-sm btn-outline-secondary"
+                                                                                        style={{ fontSize: '0.65rem', padding: '1px 6px' }}
+                                                                                        onClick={() => handleDeleteOrder(order._id)}>
+                                                                                        <i className="bi bi-trash"></i>
+                                                                                    </button>
+                                                                                </>
+                                                                            )}
+
                                                                         </div>
                                                                     </div>
                                                                 </div>
@@ -1207,17 +1332,26 @@ const TablesPage = () => {
                 <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1060 }}>
                     <div className="modal-dialog modal-dialog-centered">
                         <div className="modal-content border-0 shadow-lg" style={{ borderRadius: '15px' }}>
-                            <div className="modal-header border-0 pb-0" style={{ backgroundColor: '#FDF8F3' }}>
+                            <div className="modal-header border-0 pb-2" style={{ backgroundColor: '#FDF8F3' }}>
                                 <h5 className="modal-title fw-bold" style={{ color: '#4A2E1A' }}>
                                     <i className="bi bi-receipt me-2"></i>
-                                    تفاصيل الطلب - طاولة {viewingOrder.table?.number || '?'}
+                                    تفاصيل الطلب - {viewingOrder.table?.number ? `طاولة ${viewingOrder.table.number}` : 'سفري'}
                                 </h5>
+                                <div className="d-flex align-items-center justify-content-around w-50">
                                 <div className="d-flex align-items-center gap-2">
-                                    <button onClick={() => handlePrintReceipt(viewingOrder)} className="btn btn-sm btn-outline-secondary d-print-none" title="طباعة الفاتورة">
-                                        <i className="bi bi-printer"></i>
+                                    <button onClick={() => handlePrintReceipt(viewingOrder, 'ar')} className="btn btn-sm btn-outline-secondary d-print-none d-flex align-items-center gap-1" title="طباعة عربي">
+                                        <i className="bi bi-printer"></i> AR
                                     </button>
-                                    <button onClick={() => setViewingOrder(null)} className="btn-close d-print-none"></button>
+                                    <button onClick={() => handlePrintReceipt(viewingOrder, 'tr')} className="btn btn-sm btn-outline-secondary d-print-none d-flex align-items-center gap-1" title="Türkçe Yazdır">
+                                        <i className="bi bi-printer"></i> TR
+                                    </button>
                                 </div>
+                                    <div className="d-flex align-items-end justify-content-end w-100">
+                                        <button onClick={() => { setViewingOrder(null); }} className="btn btn-danger"> <FiX /></button>
+                                    </div>
+
+                                        
+                                    </div>
                             </div>
                             <div className="modal-body p-4" style={{ backgroundColor: '#FDF8F3' }}>
                                 <div className="mb-4">
@@ -1226,7 +1360,12 @@ const TablesPage = () => {
                                         {viewingOrder.items?.map((item, idx) => (
                                             <div key={idx} className="list-group-item d-flex justify-content-between align-items-center py-3" style={{ backgroundColor: '#fff' }}>
                                                 <div>
-                                                    <div className="fw-bold" style={{ color: '#4A2E1A' }}>{item.name}</div>
+                                                    <div className="fw-bold" style={{ color: '#4A2E1A' }}>
+                                                        {item.name}
+                                                        {item.nameTr && (
+                                                            <div className="text-muted small fw-normal">({item.nameTr})</div>
+                                                        )}
+                                                    </div>
                                                     <div className="d-flex align-items-center mt-1">
                                                         <span className="badge me-2" style={{ backgroundColor: 'rgba(107,66,38,0.1)', color: '#6B4226' }}>{item.quantity} ×</span>
                                                         <small className="text-muted">{Number(item.price).toLocaleString()} ل.ت</small>
@@ -1275,7 +1414,7 @@ const TablesPage = () => {
                     <div className="text-center mb-3">
                         <h4 className="fw-bold mb-1">Kale Cafe</h4>
                         <div className="mt-2 fw-bold" style={{ fontSize: '1.2rem', borderTop: '1px dashed #000', borderBottom: '1px dashed #000', padding: '5px 0' }}>
-                            طاولة {viewingOrder.table?.number || '?'}
+                            {viewingOrder.table?.number ? `طاولة ${viewingOrder.table.number}` : 'سفري'}
                         </div>
                     </div>
                     
@@ -1296,7 +1435,10 @@ const TablesPage = () => {
                             <tbody>
                                 {viewingOrder.items?.map((item, idx) => (
                                     <tr key={idx}>
-                                        <td className="text-end py-1">{item.name}</td>
+                                        <td className="text-end py-1">
+                                            {item.name}
+                                            {item.nameTr && <div style={{ fontSize: '0.75rem', color: '#666' }}>{item.nameTr}</div>}
+                                        </td>
                                         <td className="text-center py-1">{item.quantity}</td>
                                         <td className="text-start py-1">{(item.price * item.quantity).toLocaleString()}</td>
                                     </tr>

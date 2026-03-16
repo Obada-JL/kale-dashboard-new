@@ -262,8 +262,8 @@ const OrderLogsPage = () => {
                                                 {dayOrders.map(order => (
                                                     <tr key={order._id} style={{ cursor: 'pointer' }} onClick={() => setViewingOrder(order)}>
                                                         <td>
-                                                            <span className="badge" style={{ backgroundColor: '#6B4226' }}>
-                                                                طاولة {order.table?.number || '?'}
+                                                            <span className="badge" style={{ backgroundColor: order.orderType === 'delivery' ? '#CD853F' : '#6B4226' }}>
+                                                                {order.orderType === 'delivery' ? 'سفري' : `طاولة ${order.table?.number || '?'}`}
                                                             </span>
                                                         </td>
                                                         <td>
@@ -356,8 +356,8 @@ const OrderLogsPage = () => {
                                 <h5 className="modal-title d-flex gap-2 align-items-center mb-0" style={{ color: '#4A2E1A' }}>
                                     <i className="bi bi-receipt"></i>
                                     تفاصيل الطلب
-                                    <span className="badge" style={{ backgroundColor: '#6B4226' }}>
-                                        طاولة {viewingOrder.table?.number || '?'}
+                                    <span className="badge" style={{ backgroundColor: viewingOrder.orderType === 'delivery' ? '#CD853F' : '#6B4226' }}>
+                                        {viewingOrder.orderType === 'delivery' ? 'سفري' : `طاولة ${viewingOrder.table?.number || '?'}`}
                                     </span>
                                     {getStatusBadge(viewingOrder.status)}
                                 </h5>
@@ -377,10 +377,16 @@ const OrderLogsPage = () => {
                                         <i className="bi bi-clock me-1"></i>
                                         {formatDate(viewingOrder.createdAt)} — {formatTime(viewingOrder.createdAt)}
                                     </small>
-                                    <small className="text-muted">
-                                        <i className="bi bi-person me-1"></i>
-                                        {viewingOrder.createdBy || '-'}
-                                    </small>
+                                    <div className="d-flex gap-3">
+                                        <small className="text-muted">
+                                            <i className="bi bi-credit-card me-1"></i>
+                                            {viewingOrder.paymentMethod === 'cash' ? 'نقداً' : viewingOrder.paymentMethod === 'credit_card' ? 'بطاقة' : '-'}
+                                        </small>
+                                        <small className="text-muted">
+                                            <i className="bi bi-person me-1"></i>
+                                            {viewingOrder.createdBy || '-'}
+                                        </small>
+                                    </div>
                                 </div>
 
                                 {/* Items */}
@@ -434,12 +440,12 @@ const OrderLogsPage = () => {
                     <div className="text-center mb-3">
                         <h4 className="fw-bold mb-1">Kale Cafe</h4>
                         <div className="mt-2 fw-bold" style={{ fontSize: '1.2rem', borderTop: '1px dashed #000', borderBottom: '1px dashed #000', padding: '5px 0' }}>
-                            طاولة {viewingOrder.table?.number || '?'}
+                            {viewingOrder.orderType === 'delivery' ? 'طلب سفري' : `طاولة ${viewingOrder.table?.number || '?'}`}
                         </div>
                     </div>
                     
                     <div className="d-flex justify-content-between mb-2 pb-2" style={{ borderBottom: '1px solid #ddd', fontSize: '0.85rem' }}>
-                        <span>{formatDate(viewingOrder.createdAt)}</span>
+                        <span>الدفع: {viewingOrder.paymentMethod === 'cash' ? 'نقداً' : 'بطاقة'}</span>
                         <span>{formatTime(viewingOrder.createdAt)}</span>
                     </div>
 

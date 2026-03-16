@@ -12,7 +12,9 @@ const UsersPage = () => {
         username: '',
         email: '',
         password: '',
-        role: 'staff'
+        role: 'staff',
+        isCashier: false,
+        nameTr: ''
     });
     const { user: currentUser } = useAuth();
 
@@ -42,7 +44,7 @@ const UsersPage = () => {
         try {
             setIsLoading(true);
             await apiService.users.create(newUser);
-            setNewUser({ username: '', email: '', password: '', role: 'staff' });
+            setNewUser({ username: '', email: '', password: '', role: 'staff', isCashier: false, nameTr: '' });
             setShowCreateForm(false);
             await fetchUsers();
             toast.success('تم إنشاء المستخدم بنجاح');
@@ -66,7 +68,9 @@ const UsersPage = () => {
                 username: editingUser.username,
                 email: editingUser.email,
                 role: editingUser.role,
-                isActive: editingUser.isActive
+                isActive: editingUser.isActive,
+                isCashier: editingUser.isCashier,
+                nameTr: editingUser.nameTr
             });
             setEditingUser(null);
             await fetchUsers();
@@ -218,6 +222,15 @@ const UsersPage = () => {
                                                             {user._id === currentUser.id && (
                                                                 <span className="badge bg-info ms-2">أنت</span>
                                                             )}
+                                                            {user.isCashier && (
+                                                                <span className="badge bg-warning text-dark ms-2">
+                                                                    <i className="bi bi-cash-stack me-1"></i>
+                                                                    كاشير
+                                                                </span>
+                                                            )}
+                                                            {user.nameTr && (
+                                                                <span className="text-primary ms-2">({user.nameTr})</span>
+                                                            )}
                                                         </div>
                                                         <div className="text-muted small">{user.email}</div>
                                                     </div>
@@ -348,6 +361,32 @@ const UsersPage = () => {
                                                 <option value="admin">مدير</option>
                                             </select>
                                         </div>
+                                        <div className="col-md-6">
+                                            <div className="form-check mt-4">
+                                                <input
+                                                    type="checkbox"
+                                                    id="newIsCashier"
+                                                    checked={newUser.isCashier}
+                                                    onChange={(e) => setNewUser({ ...newUser, isCashier: e.target.checked })}
+                                                    className="form-check-input"
+                                                    disabled={isLoading}
+                                                />
+                                                <label className="form-check-label fw-semibold" htmlFor="newIsCashier">
+                                                    تعيين ككاشير
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div className="col-md-6">
+                                            <label className="form-label fw-semibold">الاسم بالتركية (للفاتورة)</label>
+                                            <input
+                                                type="text"
+                                                value={newUser.nameTr}
+                                                onChange={(e) => setNewUser({ ...newUser, nameTr: e.target.value })}
+                                                className="form-control"
+                                                placeholder="أدخل الاسم بالتركية"
+                                                disabled={isLoading}
+                                            />
+                                        </div>
                                     </div>
                                 </div>
                                 <div className="modal-footer">
@@ -443,15 +482,42 @@ const UsersPage = () => {
                                             <div className="form-check mt-4">
                                                 <input
                                                     type="checkbox"
+                                                    id="editIsActive"
                                                     checked={editingUser.isActive}
                                                     onChange={(e) => setEditingUser({ ...editingUser, isActive: e.target.checked })}
                                                     className="form-check-input"
                                                     disabled={isLoading}
                                                 />
-                                                <label className="form-check-label fw-semibold">
+                                                <label className="form-check-label fw-semibold" htmlFor="editIsActive">
                                                     مستخدم نشط
                                                 </label>
                                             </div>
+                                        </div>
+                                        <div className="col-md-6">
+                                            <div className="form-check mt-4">
+                                                <input
+                                                    type="checkbox"
+                                                    id="editIsCashier"
+                                                    checked={editingUser.isCashier}
+                                                    onChange={(e) => setEditingUser({ ...editingUser, isCashier: e.target.checked })}
+                                                    className="form-check-input"
+                                                    disabled={isLoading}
+                                                />
+                                                <label className="form-check-label fw-semibold" htmlFor="editIsCashier">
+                                                    تعيين ككاشير
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div className="col-md-6">
+                                            <label className="form-label fw-semibold">الاسم بالتركية (للفاتورة)</label>
+                                            <input
+                                                type="text"
+                                                value={editingUser.nameTr}
+                                                onChange={(e) => setEditingUser({ ...editingUser, nameTr: e.target.value })}
+                                                className="form-control"
+                                                placeholder="أدخل الاسم بالتركية"
+                                                disabled={isLoading}
+                                            />
                                         </div>
                                     </div>
                                 </div>
