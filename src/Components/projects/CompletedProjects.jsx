@@ -15,7 +15,7 @@ export default function CompletedProjects() {
     setLoading(true);
     try {
       const response = await axios.get(
-        "http://localhost:5000/api/completed-projects"
+        "https://kale-cafe.com/api/completed-projects"
       );
       setProjects(response.data);
     } catch (error) {
@@ -127,13 +127,13 @@ export default function CompletedProjects() {
 
       if (modalMode === "add") {
         await axios.post(
-          "http://localhost:5000/api/completed-projects",
+          "https://kale-cafe.com/api/completed-projects",
           formData,
           { headers: { "Content-Type": "multipart/form-data" } }
         );
       } else {
         await axios.put(
-          `http://localhost:5000/api/completed-projects/${selectedProject._id}`,
+          `https://kale-cafe.com/api/completed-projects/${selectedProject._id}`,
           formData,
           { headers: { "Content-Type": "multipart/form-data" } }
         );
@@ -154,7 +154,7 @@ export default function CompletedProjects() {
       setLoading(true);
       try {
         await axios.delete(
-          `http://localhost:5000/api/completed-projects/${id}`
+          `https://kale-cafe.com/api/completed-projects/${id}`
         );
         fetchProjects();
       } catch (error) {
@@ -207,7 +207,7 @@ export default function CompletedProjects() {
                 <tr key={project._id}>
                   <td>
                     <img
-                      src={`http://localhost:5000/uploads/completed-projects/${project.image}`}
+                      src={`https://kale-cafe.com/uploads/completed-projects/${project.image}`}
                       alt={project.title}
                       style={{
                         width: "50px",
@@ -501,7 +501,7 @@ export default function CompletedProjects() {
             <div className="view-project-details">
               <div className="text-center mb-4">
                 <img
-                  src={`http://localhost:5000/uploads/completed-projects/${viewProject.image}`}
+                  src={`https://kale-cafe.com/uploads/completed-projects/${viewProject.image}`}
                   alt={viewProject.title}
                   className="img-fluid"
                   style={{ maxHeight: "300px", objectFit: "contain" }}

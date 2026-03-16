@@ -15,7 +15,7 @@ export default function SupportProjects() {
     setLoading(true);
     try {
       const response = await axios.get(
-        "http://localhost:5000/api/support-projects"
+        "https://kale-cafe.com/api/support-projects"
       );
       setProjects(response.data);
     } catch (error) {
@@ -113,8 +113,8 @@ export default function SupportProjects() {
 
       const url =
         modalMode === "add"
-          ? "http://localhost:5000/api/support-projects"
-          : `http://localhost:5000/api/support-projects/${selectedProject._id}`;
+          ? "https://kale-cafe.com/api/support-projects"
+          : `https://kale-cafe.com/api/support-projects/${selectedProject._id}`;
 
       const method = modalMode === "add" ? "post" : "put";
 
@@ -136,7 +136,7 @@ export default function SupportProjects() {
     if (window.confirm("هل أنت متأكد من حذف هذا المشروع؟")) {
       setLoading(true);
       try {
-        await axios.delete(`http://localhost:5000/api/support-projects/${id}`);
+        await axios.delete(`https://kale-cafe.com/api/support-projects/${id}`);
         fetchProjects();
       } catch (error) {
         console.error("Error deleting project:", error);
@@ -186,7 +186,7 @@ export default function SupportProjects() {
                 <tr key={project._id}>
                   <td>
                     <img
-                      src={`http://localhost:5000/uploads/support-projects/${project.image}`}
+                      src={`https://kale-cafe.com/uploads/support-projects/${project.image}`}
                       alt={project.title}
                       style={{
                         width: "50px",
@@ -461,7 +461,7 @@ export default function SupportProjects() {
             <div className="view-project-details">
               <div className="text-center mb-4">
                 <img
-                  src={`http://localhost:5000/uploads/support-projects/${viewProject.image}`}
+                  src={`https://kale-cafe.com/uploads/support-projects/${viewProject.image}`}
                   alt={viewProject.title}
                   className="img-fluid"
                   style={{ maxHeight: "300px", objectFit: "contain" }}
@@ -491,7 +491,7 @@ export default function SupportProjects() {
                   <h5 className="border-bottom pb-2">التفاصيل الإضافية</h5>
                   <div className="text-center my-3">
                     <img
-                      src={`http://localhost:5000/uploads/support-projects/${viewProject.details.image}`}
+                      src={`https://kale-cafe.com/uploads/support-projects/${viewProject.details.image}`}
                       alt="تفاصيل"
                       className="img-fluid"
                       style={{ maxHeight: "200px", objectFit: "contain" }}
