@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { toast } from 'react-hot-toast';
 import { apiService, handleApiError } from '../../config/apiService';
+import { useConfirm } from '../ConfirmDialog';
 
 const OrderLogsPage = () => {
     const [orders, setOrders] = useState([]);
     const [pagination, setPagination] = useState({ total: 0, page: 1, limit: 20, pages: 0 });
     const [isLoading, setIsLoading] = useState(false);
     const [viewingOrder, setViewingOrder] = useState(null);
+    const confirm = useConfirm();
 
     // Filters
     const [statusFilter, setStatusFilter] = useState('all');
@@ -49,6 +51,27 @@ const OrderLogsPage = () => {
         }
     };
 
+    const handleDeleteOrder = async (orderId) => {
+        const confirmed = await confirm({
+            title: 'حذف الطلب',
+            message: 'هل أنت متأكد من حذف هذا الطلب نهائياً؟ لا يمكن التراجع عن هذه العملية.',
+            confirmText: 'حذف الآن',
+            cancelText: 'تراجع',
+            variant: 'danger'
+        });
+        
+        if (!confirmed) return;
+        
+        try {
+            await apiService.orders.delete(orderId);
+            toast.success('تم حذف الطلب بنجاح');
+            setViewingOrder(null);
+            fetchLogs(pagination.page);
+        } catch (error) {
+            handleApiError(error, 'حذف الطلب');
+        }
+    };
+
     const getStatusBadge = (status) => {
         const map = {
             active: { label: 'نشط', bg: '#6B4226', icon: 'bi-hourglass-split' },
@@ -73,8 +96,14 @@ const OrderLogsPage = () => {
         return d.toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' });
     };
 
+    // Logic for displaying orders: 
+    // If 'all' is selected, hide cancelled. If 'cancelled' is selected, show them.
+    const displayOrdersList = statusFilter === 'all' 
+        ? orders.filter(o => o.status !== 'cancelled') 
+        : orders;
+
     // Group orders by day
-    const groupedOrders = orders.reduce((groups, order) => {
+    const groupedOrders = displayOrdersList.reduce((groups, order) => {
         const dayKey = new Date(order.createdAt).toLocaleDateString('ar-SA', {
             weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
         });
@@ -256,6 +285,7 @@ const OrderLogsPage = () => {
                                                     <th>الحالة</th>
                                                     <th>مستلم الطلب</th>
                                                     <th>الوقت</th>
+                                                    <th className="text-center">الإجراءات</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -277,6 +307,24 @@ const OrderLogsPage = () => {
                                                         <td>{getStatusBadge(order.status)}</td>
                                                         <td><small className="text-muted">{order.createdBy || '-'}</small></td>
                                                         <td><small className="text-muted">{formatTime(order.createdAt)}</small></td>
+                                                        <td className="text-center" onClick={e => e.stopPropagation()}>
+                                                            <div className="d-flex gap-2 justify-content-center">
+                                                                <button 
+                                                                    onClick={() => handlePrintReceipt(order)} 
+                                                                    className="btn btn-sm btn-outline-secondary border-0 p-1"
+                                                                    title="طباعة"
+                                                                >
+                                                                    <i className="bi bi-printer"></i>
+                                                                </button>
+                                                                <button 
+                                                                    onClick={() => handleDeleteOrder(order._id)} 
+                                                                    className="btn btn-sm btn-outline-danger border-0 p-1"
+                                                                    title="حذف"
+                                                                >
+                                                                    <i className="bi bi-trash"></i>
+                                                                </button>
+                                                            </div>
+                                                        </td>
                                                     </tr>
                                                 ))}
                                             </tbody>
@@ -362,6 +410,9 @@ const OrderLogsPage = () => {
                                     {getStatusBadge(viewingOrder.status)}
                                 </h5>
                                 <div className="d-flex gap-2">
+                                    <button onClick={() => handleDeleteOrder(viewingOrder._id)} className="btn btn-sm btn-outline-danger d-print-none" title="حذف الطلب">
+                                        <i className="bi bi-trash"></i>
+                                    </button>
                                     <button onClick={() => handlePrintReceipt(viewingOrder)} className="btn btn-sm btn-outline-secondary d-print-none" title="طباعة الفاتورة">
                                         <i className="bi bi-printer"></i>
                                     </button>

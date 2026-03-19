@@ -998,7 +998,7 @@ const TablesPage = () => {
                                                                 <div className="flex-grow-1 ms-2" style={{ height: '1px', backgroundColor: 'rgba(107,66,38,0.1)' }}></div>
                                                             </div>
                                                             <div style={{
-                                                                maxHeight: isCategoryOpen(catName) ? `${items.length * 50}px` : '0',
+                                                                maxHeight: isCategoryOpen(catName) ? '5000px' : '0',
                                                                 overflow: 'hidden',
                                                                 transition: 'max-height 0.3s ease',
                                                             }}>
@@ -1152,7 +1152,7 @@ const TablesPage = () => {
                                             </div>
 
                                             {orderItems.length > 0 ? (
-                                                <div className="mb-3" style={{ maxHeight: '25vh', overflowY: 'auto' }}>
+                                                <div className="mb-3">
                                                     {orderItems.map((item, index) => (
                                                         <div key={index} className="d-flex align-items-center justify-content-between py-2 px-3 mb-1 rounded-3"
                                                             style={{ backgroundColor: 'rgba(107,66,38,0.03)', border: '1px solid rgba(107,66,38,0.08)' }}>
