@@ -415,10 +415,13 @@ const TablesPage = () => {
         { key: 'hookahs', label: 'الأراكيل', icon: 'bi-cloud', color: '#D2B48C' },
     ];
 
-    // Filter menu items by search
-    const filteredMenuItems = (menuItems[activeMenuTab] || []).filter(item =>
-        item.name.toLowerCase().includes(menuSearch.toLowerCase())
-    );
+    // Filter menu items by search (search all categories if search is active)
+    const filteredMenuItems = menuSearch 
+        ? Object.values(menuItems).flat().filter(item =>
+            item.name.toLowerCase().includes(menuSearch.toLowerCase()) ||
+            (item.nameTr && item.nameTr.toLowerCase().includes(menuSearch.toLowerCase()))
+          )
+        : (menuItems[activeMenuTab] || []);
 
     // Group by category
     const groupedMenuItems = filteredMenuItems.reduce((groups, item) => {
@@ -433,8 +436,8 @@ const TablesPage = () => {
     };
 
     const isCategoryOpen = (catName) => {
-        // Default to closed unless explicitly opened
-        return openCategories[catName] === true;
+        // Default to closed unless explicitly opened, or if searching
+        return menuSearch ? true : openCategories[catName] === true;
     };
 
     return (
