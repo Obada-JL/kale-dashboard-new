@@ -4,6 +4,7 @@ import { apiService, handleApiError } from '../../config/apiService';
 import { useAuth } from '../../context/AuthContext';
 import { useConfirm } from '../ConfirmDialog';
 import { FiX } from 'react-icons/fi';
+import * as XLSX from 'xlsx';
 
 const TablesPage = () => {
     const [tables, setTables] = useState([]);
@@ -262,7 +263,7 @@ const TablesPage = () => {
             } else {
                 // Create new order
                 await apiService.orders.add({
-                    table: selectedTable?._id || null,
+                    table: selectedTable?.number || selectedTable?._id || null, // Using number/name with ID fallback
                     items: itemsPayload,
                     notes: orderNotes,
                     createdBy: user?.username || '',
@@ -353,6 +354,28 @@ const TablesPage = () => {
             toast.success('تم إرسال الفاتورة إلى الطابعة بنجاح');
         } catch (error) {
             handleApiError(error, 'طباعة الفاتورة');
+        }
+    };
+
+    const handleExportToExcel = () => {
+        try {
+            const dataToExport = orders.map(order => ({
+                'رقم الطاولة': order.orderType === 'delivery' ? 'سفري' : (order.table?.number || '?'),
+                'نوع الطلب': order.orderType === 'delivery' ? 'سفري' : 'طاولة',
+                'العناصر': order.items?.map(item => `${item.name} (${item.quantity})`).join(', ') || '',
+                'الإجمالي': order.totalAmount || 0,
+                'الكاشير': order.createdBy || '',
+                'التاريخ': new Date(order.createdAt).toLocaleString('ar-SA'),
+            }));
+
+            const ws = XLSX.utils.json_to_sheet(dataToExport);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Active Orders");
+            XLSX.writeFile(wb, `Active_Orders_${new Date().toLocaleDateString()}.xlsx`);
+            toast.success('تم تصدير البيانات إلى إكسل بنجاح');
+        } catch (error) {
+            console.error('Excel Export Error:', error);
+            toast.error('فشل في تصدير البيانات');
         }
     };
 
@@ -692,11 +715,19 @@ const TablesPage = () => {
                 <div className="row">
                     <div className="col-12">
                         <div className="card border-0 shadow-sm">
-                            <div className="card-header bg-light border-0">
+                            <div className="card-header bg-light border-0 d-flex justify-content-between align-items-center">
                                 <h5 className="card-title mb-0" style={{ color: '#4A2E1A' }}>
                                     <i className="bi bi-receipt me-2"></i>
                                     الطلبات النشطة ({orders.length})
                                 </h5>
+                                <button 
+                                    onClick={handleExportToExcel}
+                                    className="btn btn-sm text-white d-flex align-items-center gap-2"
+                                    style={{ background: '#6B4226', borderRadius: '8px' }}
+                                >
+                                    <i className="bi bi-file-earmark-excel"></i>
+                                    تصدير إكسل
+                                </button>
                             </div>
                             <div className="card-body p-0">
                                 <div className="table-responsive">
