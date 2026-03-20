@@ -263,7 +263,7 @@ const TablesPage = () => {
             } else {
                 // Create new order
                 await apiService.orders.add({
-                    table: selectedTable?.number || selectedTable?._id || null, // Using number/name with ID fallback
+                    table: selectedTable?._id || null,
                     items: itemsPayload,
                     notes: orderNotes,
                     createdBy: user?.username || '',
