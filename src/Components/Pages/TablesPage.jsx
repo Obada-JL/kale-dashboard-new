@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { toast } from 'react-hot-toast';
 import { apiService, handleApiError } from '../../config/apiService';
 import { useAuth } from '../../context/AuthContext';
@@ -33,7 +33,7 @@ const TablesPage = () => {
     const [openCategories, setOpenCategories] = useState({});
 
     // Custom order item
-    const [customItem, setCustomItem] = useState({ name: '', price: '' });
+    const [customItem, setCustomItem] = useState({ name: '', nameTr: '', price: '' });
     const [showCustomItem, setShowCustomItem] = useState(false);
 
     // New table form
@@ -48,6 +48,8 @@ const TablesPage = () => {
     const [orderType, setOrderType] = useState('table');
     const [paymentMethod, setPaymentMethod] = useState('cash');
     const [printLang, setPrintLang] = useState('ar');
+    const [originalOrderItems, setOriginalOrderItems] = useState([]);
+    const [discount, setDiscount] = useState(0);
 
     useEffect(() => {
         fetchTables();
@@ -174,15 +176,21 @@ const TablesPage = () => {
                 setOrderType(activeOrder.orderType || 'table');
                 setPaymentMethod(activeOrder.paymentMethod || 'cash');
                 console.log(activeOrder);
-                setOrderItems(activeOrder.items?.map(item => ({
+                const items = activeOrder.items?.map(item => ({
                     name: item.name,
                     nameTr: item.nameTr || '',
                     price: item.price,
                     quantity: item.quantity,
                     notes: item.notes || ''
-                })) || []);
+                })) || [];
+                setOrderItems(items);
+                setOriginalOrderItems([...items]);
                 setOrderNotes(activeOrder.notes || '');
+                setDiscount(activeOrder.discount || 0);
             }
+        } else {
+            setOriginalOrderItems([]);
+            setDiscount(0);
         }
         setShowOrderModal(true);
     };
@@ -192,6 +200,8 @@ const TablesPage = () => {
         setOrderType('delivery');
         setPaymentMethod('cash');
         setOrderItems([]);
+        setOriginalOrderItems([]);
+        setDiscount(0);
         setOrderNotes('');
         setEditingOrderId(null);
         setMenuSearch('');
@@ -254,21 +264,23 @@ const TablesPage = () => {
             if (editingOrderId) {
                 // Update existing order
                 await apiService.orders.update(editingOrderId, {
-                    items: itemsPayload,
-                    notes: orderNotes,
                     orderType,
-                    paymentMethod
+                    paymentMethod,
+                    tableNumber: selectedTable?.number || null,
+                    discount: Number(discount) || 0
                 });
                 toast.success('تم تحديث الطلب بنجاح');
             } else {
                 // Create new order
                 await apiService.orders.add({
                     table: selectedTable?._id || null,
+                    tableNumber: selectedTable?.number || null,
                     items: itemsPayload,
                     notes: orderNotes,
                     createdBy: user?.username || '',
                     orderType,
-                    paymentMethod
+                    paymentMethod,
+                    discount: Number(discount) || 0
                 });
                 toast.success('تم إنشاء الطلب بنجاح');
             }
@@ -280,6 +292,21 @@ const TablesPage = () => {
             if (selectedTable) {
                 await fetchTableOrders(selectedTable._id);
             }
+
+            // Auto-print bar receipt
+            const currentOrderData = {
+                table: selectedTable || { number: selectedTable?.number || 'سفري' },
+                tableNumber: selectedTable?.number || null,
+                items: itemsPayload,
+                notes: orderNotes,
+                orderType,
+                createdAt: new Date().toISOString(),
+                discount: Number(discount) || 0,
+                tax: paymentMethod === 'credit_card' ? orderItemsSubtotal * 0.05 : 0
+            };
+            
+            handlePrintBarReceipt(currentOrderData, editingOrderId ? originalOrderItems : null);
+
             setShowOrderModal(false); // Close modal after successful order
         } catch (error) {
             handleApiError(error, editingOrderId ? 'تحديث طلب' : 'إنشاء طلب');
@@ -357,6 +384,16 @@ const TablesPage = () => {
         }
     };
 
+    const handlePrintBarReceipt = async (order, previousItems = null) => {
+        try {
+            await apiService.print.barReceipt({ ...order, previousItems, lang: 'ar' });
+            // toast.success('تم إرسال طلب البار إلى الطابعة');
+        } catch (error) {
+            console.error('Bar print error:', error);
+            toast.error('فشل إرسال طلب البار');
+        }
+    };
+
     const handleExportToExcel = () => {
         try {
             const dataToExport = orders.map(order => ({
@@ -399,7 +436,17 @@ const TablesPage = () => {
     const reservedCount = tables.filter(t => t.status === 'reserved').length;
     const activeOrdersCount = orders.filter(o => o.status === 'active').length;
     const totalOrdersAmount = orders.filter(o => o.status === 'active').reduce((sum, o) => sum + (o.totalAmount || 0), 0);
-    const orderItemsTotal = orderItems.reduce((sum, item) => sum + (Number(item.price) || 0) * (Number(item.quantity) || 1), 0);
+    const orderItemsSubtotal = useMemo(() => {
+        return orderItems.reduce((sum, item) => sum + (Number(item.price) * Number(item.quantity)), 0);
+    }, [orderItems]);
+
+    const orderTax = useMemo(() => {
+        return paymentMethod === 'credit_card' ? orderItemsSubtotal * 0.05 : 0;
+    }, [orderItemsSubtotal, paymentMethod]);
+
+    const orderTotal = useMemo(() => {
+        return (orderItemsSubtotal - (Number(discount) || 0)) - orderTax;
+    }, [orderItemsSubtotal, discount, orderTax]);
 
     const filteredTables = tables.filter(table =>
         filterStatus === 'all' || table.status === filterStatus
@@ -784,6 +831,13 @@ const TablesPage = () => {
                                                                 disabled={isLoading}>
                                                                 <i className="bi bi-printer"></i>TR
                                                             </button>
+                                                            <button className="btn btn-sm btn-outline-dark d-flex align-items-center gap-1"
+                                                                style={{ fontSize: '0.7rem', padding: '0.2rem 0.4rem' }}
+                                                                onClick={() => handlePrintBarReceipt(order)}
+                                                                title="طباعة بار"
+                                                                disabled={isLoading}>
+                                                                <i className="bi bi-cup-straw"></i>Bar
+                                                            </button>
                                                             <div className="vr mx-1"></div>
                                                             {!isStaff && (
                                                                 <>
@@ -1109,35 +1163,52 @@ const TablesPage = () => {
                                                     <span className="fw-semibold" style={{ color: '#4A2E1A', fontSize: '0.85rem' }}>إضافة عنصر مخصص</span>
                                                 </div>
                                                 {showCustomItem && (
-                                                    <div className="d-flex gap-2">
-                                                        <input
-                                                            type="text"
-                                                            className="form-control form-control-sm"
-                                                            placeholder="اسم العنصر"
-                                                            value={customItem.name}
-                                                            onChange={e => setCustomItem({ ...customItem, name: e.target.value })}
-                                                            style={{ borderRadius: '8px', fontSize: '0.85rem' }}
-                                                        />
-                                                        <input
-                                                            type="number"
-                                                            className="form-control form-control-sm"
-                                                            placeholder="السعر"
-                                                            value={customItem.price}
-                                                            onChange={e => setCustomItem({ ...customItem, price: e.target.value })}
-                                                            style={{ borderRadius: '8px', fontSize: '0.85rem', maxWidth: '90px' }}
-                                                            min="0"
-                                                        />
-                                                        <button
-                                                            className="btn btn-sm text-white"
-                                                            style={{ background: 'linear-gradient(135deg, #6B4226, #CD853F)', borderRadius: '8px', whiteSpace: 'nowrap' }}
-                                                            disabled={!customItem.name || !customItem.price}
-                                                            onClick={() => {
-                                                                handleAddMenuItemToOrder({ name: customItem.name, price: Number(customItem.price) });
-                                                                setCustomItem({ name: '', price: '' });
-                                                            }}
-                                                        >
-                                                            <i className="bi bi-plus"></i>
-                                                        </button>
+                                                    <div className="d-flex flex-column gap-2">
+                                                        <div className="d-flex gap-2">
+                                                            <input
+                                                                type="text"
+                                                                className="form-control form-control-sm"
+                                                                placeholder="اسم العنصر (عربي)"
+                                                                value={customItem.name}
+                                                                onChange={e => setCustomItem({ ...customItem, name: e.target.value })}
+                                                                style={{ borderRadius: '8px', fontSize: '0.85rem' }}
+                                                            />
+                                                            <input
+                                                                type="text"
+                                                                className="form-control form-control-sm"
+                                                                placeholder="Product Name (TR)"
+                                                                value={customItem.nameTr}
+                                                                onChange={e => setCustomItem({ ...customItem, nameTr: e.target.value })}
+                                                                style={{ borderRadius: '8px', fontSize: '0.85rem' }}
+                                                            />
+                                                        </div>
+                                                        <div className="d-flex gap-2">
+                                                            <input
+                                                                type="number"
+                                                                className="form-control form-control-sm"
+                                                                placeholder="السعر"
+                                                                value={customItem.price}
+                                                                onChange={e => setCustomItem({ ...customItem, price: e.target.value })}
+                                                                style={{ borderRadius: '8px', fontSize: '0.85rem', maxWidth: '120px' }}
+                                                                min="0"
+                                                            />
+                                                            <button
+                                                                className="btn btn-sm text-white flex-grow-1"
+                                                                style={{ background: 'linear-gradient(135deg, #6B4226, #CD853F)', borderRadius: '8px', whiteSpace: 'nowrap' }}
+                                                                disabled={!customItem.name || !customItem.price}
+                                                                onClick={() => {
+                                                                    handleAddMenuItemToOrder({ 
+                                                                        name: customItem.name, 
+                                                                        nameTr: customItem.nameTr, 
+                                                                        price: Number(customItem.price) 
+                                                                    });
+                                                                    setCustomItem({ name: '', nameTr: '', price: '' });
+                                                                }}
+                                                            >
+                                                                <i className="bi bi-plus me-1"></i>
+                                                                إضافة للطلب
+                                                            </button>
+                                                        </div>
                                                     </div>
                                                 )}
                                             </div>
@@ -1238,19 +1309,51 @@ const TablesPage = () => {
                                             )}
 
                                             {/* Order Notes */}
-                                            <div className="mb-3">
+                                            <div className="mb-2">
                                                 <input type="text" className="form-control form-control-sm" placeholder="ملاحظات عامة على الطلب..."
                                                     value={orderNotes} onChange={e => setOrderNotes(e.target.value)} disabled={isLoading}
                                                     style={{ borderRadius: '8px', fontSize: '0.85rem' }} />
                                             </div>
 
+                                            {/* Discount Input */}
+                                            <div className="mb-3">
+                                                <div className="input-group input-group-sm">
+                                                    <span className="input-group-text" style={{ backgroundColor: 'rgba(107,66,38,0.06)', color: '#6B4226', border: '1px solid rgba(107,66,38,0.1)' }}>خصم (ل.ت)</span>
+                                                    <input 
+                                                        type="number" 
+                                                        className="form-control" 
+                                                        value={discount} 
+                                                        onChange={e => setDiscount(e.target.value)}
+                                                        min="0"
+                                                        placeholder="0"
+                                                        style={{ border: '1px solid rgba(107,66,38,0.1)' }}
+                                                    />
+                                                </div>
+                                            </div>
+
                                             {/* Total + Submit */}
                                             {orderItems.length > 0 && (
                                                 <div className="p-3 rounded-3 mb-3" style={{ backgroundColor: 'rgba(107,66,38,0.06)', border: '1px solid rgba(107,66,38,0.12)' }}>
-                                                    <div className="d-flex justify-content-between align-items-center">
-                                                        <span className="fw-bold" style={{ color: '#4A2E1A' }}>المجموع:</span>
-                                                        <span className="fw-bold fs-5" style={{ color: '#6B4226' }}>
-                                                            {orderItemsTotal.toLocaleString()} ل.ت
+                                                    <div className="d-flex justify-content-between align-items-center mb-1 pb-1 border-bottom border-dashed" style={{ fontSize: '0.85rem' }}>
+                                                        <span className="text-muted">المجموع الفرعي:</span>
+                                                        <span className="fw-semibold">{orderItemsSubtotal.toLocaleString()} ل.ت</span>
+                                                    </div>
+                                                    {Number(discount) > 0 && (
+                                                        <div className="d-flex justify-content-between align-items-center mb-1 pb-1 border-bottom border-dashed text-danger" style={{ fontSize: '0.85rem' }}>
+                                                            <span>الخصم:</span>
+                                                            <span>-{Number(discount).toLocaleString()} ل.ت</span>
+                                                        </div>
+                                                    )}
+                                                    {orderTax > 0 && (
+                                                        <div className="d-flex justify-content-between align-items-center mb-1 pb-1 border-bottom border-dashed text-danger" style={{ fontSize: '0.85rem' }}>
+                                                            <span>خصم بطاقة (5%):</span>
+                                                            <span>-{orderTax.toLocaleString()} ل.ت</span>
+                                                        </div>
+                                                    )}
+                                                    <div className="d-flex justify-content-between align-items-center mt-2">
+                                                        <span className="fw-bold fs-5" style={{ color: '#4A2E1A' }}>الإجمالي:</span>
+                                                        <span className="fw-bold fs-4" style={{ color: '#6B4226' }}>
+                                                            {orderTotal.toLocaleString()} ل.ت
                                                         </span>
                                                     </div>
                                                 </div>
@@ -1301,6 +1404,12 @@ const TablesPage = () => {
                                                                                 onClick={() => handlePrintReceipt(order, 'tr')}
                                                                                 title="Türkçe Yazdır">
                                                                                 <i className="bi bi-printer"></i> TR
+                                                                            </button>
+                                                                            <button className="btn btn-sm btn-outline-dark"
+                                                                                style={{ fontSize: '0.65rem', padding: '1px 6px' }}
+                                                                                onClick={() => handlePrintBarReceipt(order)}
+                                                                                title="طباعة بار">
+                                                                                <i className="bi bi-cup-straw"></i> Bar
                                                                             </button>
                                                                             {!isStaff && (
                                                                                 <>
@@ -1379,6 +1488,9 @@ const TablesPage = () => {
                                     <button onClick={() => handlePrintReceipt(viewingOrder, 'tr')} className="btn btn-sm btn-outline-secondary d-print-none d-flex align-items-center gap-1" title="Türkçe Yazdır">
                                         <i className="bi bi-printer"></i> TR
                                     </button>
+                                    <button onClick={() => handlePrintBarReceipt(viewingOrder)} className="btn btn-sm btn-outline-dark d-print-none d-flex align-items-center gap-1" title="طباعة بار">
+                                        <i className="bi bi-cup-straw"></i> Bar
+                                    </button>
                                 </div>
                                     <div className="d-flex align-items-end justify-content-end w-100">
                                         <button onClick={() => { setViewingOrder(null); }} className="btn btn-danger"> <FiX /></button>
@@ -1427,9 +1539,29 @@ const TablesPage = () => {
                                     </div>
                                 )}
 
-                                <div className="d-flex justify-content-between align-items-center p-3 rounded-3 mt-4" style={{ backgroundColor: '#6B4226', color: '#fff' }}>
-                                    <span className="fw-bold fs-5">الإجمالي كلياً:</span>
-                                    <span className="fw-bold fs-4">{(viewingOrder.totalAmount || 0).toLocaleString()} ل.ت</span>
+                                <div className="mt-4 p-3 rounded-3" style={{ backgroundColor: 'rgba(107,66,38,0.06)', border: '1px solid rgba(107,66,38,0.12)' }}>
+                                    <div className="d-flex justify-content-between align-items-center mb-1 pb-1 border-bottom border-dashed" style={{ fontSize: '0.85rem' }}>
+                                        <span className="text-muted">المجموع الفرعي:</span>
+                                        <span className="fw-semibold">{(viewingOrder.subtotal || (viewingOrder.totalAmount + (viewingOrder.discount || 0) + (viewingOrder.tax || 0))).toLocaleString()} ل.ت</span>
+                                    </div>
+                                    {viewingOrder.discount > 0 && (
+                                        <div className="d-flex justify-content-between align-items-center mb-1 pb-1 border-bottom border-dashed text-danger" style={{ fontSize: '0.85rem' }}>
+                                            <span>الخصم:</span>
+                                            <span>-{viewingOrder.discount.toLocaleString()} ل.ت</span>
+                                        </div>
+                                    )}
+                                    {viewingOrder.tax > 0 && (
+                                        <div className="d-flex justify-content-between align-items-center mb-1 pb-1 border-bottom border-dashed text-danger" style={{ fontSize: '0.85rem' }}>
+                                            <span>خصم بطاقة (5%):</span>
+                                            <span>-{viewingOrder.tax.toLocaleString()} ل.ت</span>
+                                        </div>
+                                    )}
+                                    <div className="d-flex justify-content-between align-items-center mt-2">
+                                        <span className="fw-bold fs-5" style={{ color: '#4A2E1A' }}>الإجمالي:</span>
+                                        <span className="fw-bold fs-4" style={{ color: '#6B4226' }}>
+                                            {(viewingOrder.totalAmount || 0).toLocaleString()} ل.ت
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
                             <div className="modal-footer border-0 pt-0 d-print-none" style={{ backgroundColor: '#FDF8F3' }}>
@@ -1487,9 +1619,27 @@ const TablesPage = () => {
                         </div>
                     )}
 
-                    <div className="d-flex justify-content-between pt-2 fw-bold" style={{ borderTop: '2px dashed #000', fontSize: '1.2rem' }}>
-                        <span>الإجمالي:</span>
-                        <span>{(viewingOrder.totalAmount || 0).toLocaleString()} ل.ت</span>
+                    <div className="pt-2 border-top border-dashed">
+                        <div className="d-flex justify-content-between" style={{ fontSize: '0.9rem' }}>
+                            <span>المجموع الفرعي:</span>
+                            <span>{(viewingOrder.subtotal || (viewingOrder.totalAmount + (viewingOrder.discount || 0) + (viewingOrder.tax || 0))).toLocaleString()} ل.ت</span>
+                        </div>
+                        {viewingOrder.discount > 0 && (
+                            <div className="d-flex justify-content-between" style={{ fontSize: '0.9rem' }}>
+                                <span>الخصم:</span>
+                                <span>-{viewingOrder.discount.toLocaleString()} ل.ت</span>
+                            </div>
+                        )}
+                        {viewingOrder.tax > 0 && (
+                            <div className="d-flex justify-content-between" style={{ fontSize: '0.9rem' }}>
+                                <span>خصم بطاقة (5%):</span>
+                                <span>-{viewingOrder.tax.toLocaleString()} ل.ت</span>
+                            </div>
+                        )}
+                        <div className="d-flex justify-content-between fw-bold mt-1" style={{ fontSize: '1.2rem', borderTop: '1px solid #000' }}>
+                            <span>الإجمالي:</span>
+                            <span>{(viewingOrder.totalAmount || 0).toLocaleString()} ل.ت</span>
+                        </div>
                     </div>
                     
                     <div className="text-center mt-4 pb-2" style={{ fontSize: '0.8rem' }}>

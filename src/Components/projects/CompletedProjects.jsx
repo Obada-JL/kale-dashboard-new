@@ -1,3 +1,4 @@
+import API_BASE_URL from "../../config/api";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Modal, Button, Table, Spinner } from "react-bootstrap";
@@ -15,7 +16,7 @@ export default function CompletedProjects() {
     setLoading(true);
     try {
       const response = await axios.get(
-        "https://kale-cafe.com/api/completed-projects"
+        `${API_BASE_URL}/api/completed-projects`
       );
       setProjects(response.data);
     } catch (error) {
@@ -127,13 +128,13 @@ export default function CompletedProjects() {
 
       if (modalMode === "add") {
         await axios.post(
-          "https://kale-cafe.com/api/completed-projects",
+          `${API_BASE_URL}/api/completed-projects`,
           formData,
           { headers: { "Content-Type": "multipart/form-data" } }
         );
       } else {
         await axios.put(
-          `https://kale-cafe.com/api/completed-projects/${selectedProject._id}`,
+          `${API_BASE_URL}/api/completed-projects/${selectedProject._id}`,
           formData,
           { headers: { "Content-Type": "multipart/form-data" } }
         );
@@ -154,7 +155,7 @@ export default function CompletedProjects() {
       setLoading(true);
       try {
         await axios.delete(
-          `https://kale-cafe.com/api/completed-projects/${id}`
+          `${API_BASE_URL}/api/completed-projects/${id}`
         );
         fetchProjects();
       } catch (error) {
@@ -207,7 +208,7 @@ export default function CompletedProjects() {
                 <tr key={project._id}>
                   <td>
                     <img
-                      src={`https://kale-cafe.com/uploads/completed-projects/${project.image}`}
+                      src={`${API_BASE_URL}/uploads/completed-projects/${project.image}`}
                       alt={project.title}
                       style={{
                         width: "50px",
@@ -501,7 +502,7 @@ export default function CompletedProjects() {
             <div className="view-project-details">
               <div className="text-center mb-4">
                 <img
-                  src={`https://kale-cafe.com/uploads/completed-projects/${viewProject.image}`}
+                  src={`${API_BASE_URL}/uploads/completed-projects/${viewProject.image}`}
                   alt={viewProject.title}
                   className="img-fluid"
                   style={{ maxHeight: "300px", objectFit: "contain" }}

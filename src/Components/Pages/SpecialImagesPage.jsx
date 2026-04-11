@@ -1,3 +1,4 @@
+import API_BASE_URL from "../../config/api";
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import { apiService, handleApiError } from '../../config/apiService';
@@ -305,7 +306,7 @@ const SpecialImagesPage = () => {
                                             <div className="card border-0 shadow-sm h-100">
                                                 <div className="position-relative">
                                                     <img
-                                                        src={`https://kale-cafe.com/uploads/${image.image}`}
+                                                        src={`${API_BASE_URL}/uploads/${image.image}`}
                                                         alt="صورة خاصة"
                                                         className="card-img-top"
                                                         style={{ height: '200px', objectFit: 'cover' }}
@@ -313,7 +314,7 @@ const SpecialImagesPage = () => {
                                                     <div className="position-absolute top-0 end-0 m-2">
                                                         <div className="btn-group-vertical">
                                                             <button
-                                                                onClick={() => window.open(`https://kale-cafe.com/uploads/${image.image}`, '_blank')}
+                                                                onClick={() => window.open(`${API_BASE_URL}/uploads/${image.image}`, '_blank')}
                                                                 className="btn btn-sm btn-info mb-1"
                                                                 title="عرض"
                                                             >

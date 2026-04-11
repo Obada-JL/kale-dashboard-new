@@ -133,7 +133,6 @@
 .navbar[dir="rtl"] .nav-link,
 .navbar[dir="rtl"] .dropdown-item {
   font-weight: 500;
-  letter-spacing: 0.5px;
 }
 
 .nav-link-custom {

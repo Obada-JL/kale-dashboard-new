@@ -1,3 +1,4 @@
+import API_BASE_URL from "../../config/api";
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import { apiService, handleApiError } from '../../config/apiService';
@@ -541,7 +542,7 @@ const HookahPage = () => {
                                         <div key={image._id} className="col-6">
                                             <div className="position-relative">
                                                 <img
-                                                    src={`https://kale-cafe.com/uploads/${image.imagePath}`}
+                                                    src={`${API_BASE_URL}/uploads/${image.imagePath}`}
                                                     alt="Hookah"
                                                     className="img-fluid rounded shadow-sm"
                                                     style={{ height: '100px', width: '100%', objectFit: 'cover' }}
@@ -742,7 +743,7 @@ const HookahPage = () => {
                                         <div className="col-12">
                                             <label className="form-label fw-semibold">الفئة</label>
                                             <select
-                                                value={editingProduct.category}
+                                                value={(typeof editingProduct.category === 'object' && editingProduct.category !== null) ? editingProduct.category._id : (editingProduct.category || '')}
                                                 onChange={(e) => setEditingProduct({ ...editingProduct, category: e.target.value })}
                                                 className="form-select"
                                                 required

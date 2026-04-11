@@ -1,6 +1,6 @@
 // Kale Cafe API Configuration
-// const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://kale-cafe.com';
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://kale-cafe.com';
+// const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 export const API_ENDPOINTS = {
   // Authentication
@@ -117,6 +117,7 @@ export const API_ENDPOINTS = {
   // Printing
   PRINT: {
     RECEIPT: '/api/print',
+    BAR_RECEIPT: '/api/print/bar',
   }
 };
 

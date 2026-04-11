@@ -1,3 +1,4 @@
+import API_BASE_URL from "../../config/api";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Modal, Button, Table, Spinner, Form } from "react-bootstrap";
@@ -15,7 +16,7 @@ export default function SupportCampaigns() {
     setLoading(true);
     try {
       const response = await axios.get(
-        "https://kale-cafe.com/api/support-campaigns"
+        `${API_BASE_URL}/api/support-campaigns`
       );
       setCampaigns(response.data);
     } catch (error) {
@@ -88,8 +89,8 @@ export default function SupportCampaigns() {
       }
 
       const url = modalMode === "add"
-        ? "https://kale-cafe.com/api/support-campagins"
-        : `https://kale-cafe.com/api/support-campagins/${selectedCampaign._id}`;
+        ? `${API_BASE_URL}/api/support-campagins`
+        : `${API_BASE_URL}/api/support-campagins/${selectedCampaign._id}`;
 
       await axios({
         method: modalMode === "add" ? "post" : "put",
@@ -112,7 +113,7 @@ export default function SupportCampaigns() {
     if (window.confirm("هل أنت متأكد من حذف هذه الحملة؟")) {
       setLoading(true);
       try {
-        await axios.delete(`https://kale-cafe.com/api/support-campagins/${id}`);
+        await axios.delete(`${API_BASE_URL}/api/support-campagins/${id}`);
         fetchCampaigns();
       } catch (error) {
         console.error("Error deleting campaign:", error);
@@ -166,7 +167,7 @@ export default function SupportCampaigns() {
                 <tr key={campaign._id}>
                   <td>
                     <img
-                      src={`https://kale-cafe.com/uploads/support-campaigns/${campaign.image}`}
+                      src={`${API_BASE_URL}/uploads/support-campaigns/${campaign.image}`}
                       alt={campaign.title}
                       style={{ width: "100px", height: "60px", objectFit: "cover" }}
                     />
@@ -369,7 +370,7 @@ export default function SupportCampaigns() {
             <div className="view-campaign-details">
               <div className="text-center mb-4">
                 <img
-                  src={`https://kale-cafe.com/uploads/support-campaigns/${viewCampaign.image}`}
+                  src={`${API_BASE_URL}/uploads/support-campaigns/${viewCampaign.image}`}
                   alt={viewCampaign.title}
                   className="img-fluid"
                   style={{ maxHeight: "300px", objectFit: "contain" }}

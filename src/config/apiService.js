@@ -174,6 +174,7 @@ export const apiService = {
   // Print
   print: {
     receipt: (data) => apiClient.post(API_ENDPOINTS.PRINT.RECEIPT, data),
+    barReceipt: (data) => apiClient.post(API_ENDPOINTS.PRINT.BAR_RECEIPT, data),
   },
 };
 

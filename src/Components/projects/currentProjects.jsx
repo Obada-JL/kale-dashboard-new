@@ -1,3 +1,4 @@
+import API_BASE_URL from "../../config/api";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Modal, Button, Table, Spinner } from "react-bootstrap";
@@ -16,7 +17,7 @@ export default function CurrentProjects() {
     setLoading(true);
     try {
       const response = await axios.get(
-        "https://kale-cafe.com/api/current-projects"
+        `${API_BASE_URL}/api/current-projects`
       );
       setProjects(response.data);
     } catch (error) {
@@ -117,8 +118,8 @@ export default function CurrentProjects() {
 
       const url =
         modalMode === "add"
-          ? "https://kale-cafe.com/api/current-projects"
-          : `https://kale-cafe.com/api/current-projects/${selectedProject._id}`;
+          ? `${API_BASE_URL}/api/current-projects`
+          : `${API_BASE_URL}/api/current-projects/${selectedProject._id}`;
 
       const method = modalMode === "add" ? "post" : "put";
 
@@ -140,7 +141,7 @@ export default function CurrentProjects() {
     if (window.confirm("هل أنت متأكد من حذف هذا المشروع؟")) {
       setLoading(true);
       try {
-        await axios.delete(`https://kale-cafe.com/api/current-projects/${id}`);
+        await axios.delete(`${API_BASE_URL}/api/current-projects/${id}`);
         fetchProjects();
       } catch (error) {
         console.error("Error deleting project:", error);
@@ -190,7 +191,7 @@ export default function CurrentProjects() {
                 <tr key={project._id}>
                   <td>
                     <img
-                      src={`https://kale-cafe.com/uploads/current-projects/${project.image}`}
+                      src={`${API_BASE_URL}/uploads/current-projects/${project.image}`}
                       alt={project.title}
                       style={{
                         width: "50px",
@@ -484,7 +485,7 @@ export default function CurrentProjects() {
             <div className="view-project-details">
               <div className="text-center mb-4">
                 <img
-                  src={`https://kale-cafe.com/uploads/current-projects/${viewProject.image}`}
+                  src={`${API_BASE_URL}/uploads/current-projects/${viewProject.image}`}
                   alt={viewProject.title}
                   className="img-fluid"
                   style={{ maxHeight: "300px", objectFit: "contain" }}
@@ -517,7 +518,7 @@ export default function CurrentProjects() {
                   {viewProject.details.image && (
                     <div className="text-center my-3">
                       <img
-                        src={`https://kale-cafe.com/uploads/current-projects/${viewProject.details.image}`}
+                        src={`${API_BASE_URL}/uploads/current-projects/${viewProject.details.image}`}
                         alt="تفاصيل"
                         className="img-fluid"
                         style={{ maxHeight: "200px", objectFit: "contain" }}
