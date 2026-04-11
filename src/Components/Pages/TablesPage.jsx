@@ -307,7 +307,7 @@ const TablesPage = () => {
                 tax: paymentMethod === 'credit_card' ? orderItemsSubtotal * 0.05 : 0
             };
             
-            /* handlePrintBarReceipt(currentOrderData, editingOrderId ? originalOrderItems : null); */
+            // handlePrintBarReceipt(currentOrderData, editingOrderId ? originalOrderItems : null);
 
             setShowOrderModal(false); // Close modal after successful order
         } catch (error) {
@@ -387,13 +387,13 @@ const TablesPage = () => {
     };
 
     const handlePrintBarReceipt = async (order, previousItems = null) => {
-        // try {
-        //     await apiService.print.barReceipt({ ...order, previousItems, lang: 'ar' });
-        //     // toast.success('تم إرسال طلب البار إلى الطابعة');
-        // } catch (error) {
-        //     console.error('Bar print error:', error);
-        //     toast.error('فشل إرسال طلب البار');
-        // }
+        try {
+            await apiService.print.barReceipt({ ...order, previousItems, lang: 'ar' });
+            toast.success('تم إرسال طلب البار إلى الطابعة');
+        } catch (error) {
+            console.error('Bar print error:', error);
+            toast.error('فشل إرسال طلب البار');
+        }
     };
 
     const handleExportToExcel = () => {
