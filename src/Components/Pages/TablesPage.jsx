@@ -307,7 +307,7 @@ const TablesPage = () => {
                 tax: paymentMethod === 'credit_card' ? orderItemsSubtotal * 0.05 : 0
             };
             
-            // handlePrintBarReceipt(currentOrderData, editingOrderId ? originalOrderItems : null);
+            handlePrintBarReceipt(currentOrderData, editingOrderId ? originalOrderItems : null);
 
             setShowOrderModal(false); // Close modal after successful order
         } catch (error) {
