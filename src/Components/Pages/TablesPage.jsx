@@ -264,6 +264,8 @@ const TablesPage = () => {
             if (editingOrderId) {
                 // Update existing order
                 await apiService.orders.update(editingOrderId, {
+                    items: itemsPayload,
+                    notes: orderNotes,
                     orderType,
                     paymentMethod,
                     tableNumber: selectedTable?.number || null,
