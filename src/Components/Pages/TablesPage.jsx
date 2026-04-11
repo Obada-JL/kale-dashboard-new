@@ -387,13 +387,13 @@ const TablesPage = () => {
     };
 
     const handlePrintBarReceipt = async (order, previousItems = null) => {
-        try {
-            await apiService.print.barReceipt({ ...order, previousItems, lang: 'ar' });
-            // toast.success('تم إرسال طلب البار إلى الطابعة');
-        } catch (error) {
-            console.error('Bar print error:', error);
-            toast.error('فشل إرسال طلب البار');
-        }
+        // try {
+        //     await apiService.print.barReceipt({ ...order, previousItems, lang: 'ar' });
+        //     // toast.success('تم إرسال طلب البار إلى الطابعة');
+        // } catch (error) {
+        //     console.error('Bar print error:', error);
+        //     toast.error('فشل إرسال طلب البار');
+        // }
     };
 
     const handleExportToExcel = () => {
