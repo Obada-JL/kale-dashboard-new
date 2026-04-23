@@ -8,7 +8,14 @@ const OrderLogsPage = () => {
     const [pagination, setPagination] = useState({ total: 0, page: 1, limit: 20, pages: 0 });
     const [isLoading, setIsLoading] = useState(false);
     const [viewingOrder, setViewingOrder] = useState(null);
+    const [stats, setStats] = useState({ totalAmount: 0, totalDiscounts: 0, totalGross: 0, completedCount: 0 });
+    const [showTotals, setShowTotals] = useState(false);
     const confirm = useConfirm();
+
+    const formatAmount = (amount) => {
+        if (!showTotals) return '******';
+        return (amount || 0).toLocaleString();
+    };
 
     // Filters
     const [statusFilter, setStatusFilter] = useState('all');
@@ -29,6 +36,7 @@ const OrderLogsPage = () => {
             const response = await apiService.orders.getLogs(params);
             setOrders(response.data.orders);
             setPagination(response.data.pagination);
+            if (response.data.stats) setStats(response.data.stats);
         } catch (error) {
             handleApiError(error, 'جلب سجل الطلبات');
         } finally {
@@ -115,23 +123,35 @@ const OrderLogsPage = () => {
         return groups;
     }, {});
 
-    // Summary stats for current page
-    const totalAmount = orders.reduce((sum, o) => sum + (o.totalAmount || 0), 0);
-    const totalDiscounts = orders.reduce((sum, o) => sum + (Number(o.discount) || 0) + (Number(o.tax) || 0), 0);
-    const totalGross = orders.reduce((sum, o) => sum + (o.subtotal || (o.totalAmount + (o.discount || 0) + (o.tax || 0))), 0);
-    const completedCount = orders.filter(o => o.status === 'completed').length;
-    const cancelledCount = orders.filter(o => o.status === 'cancelled').length;
-
     return (
         <div className="container-fluid p-4" style={{ backgroundColor: 'var(--bs-kale-cream, #F5EDE3)', minHeight: '100vh' }}>
             {/* Header */}
-            <div className="row mb-4">
-                <div className="col-12">
+            <div className="row mb-4 align-items-center">
+                <div className="col-md-8">
                     <h1 className="display-6 fw-bold mb-1 d-flex gap-2 align-items-center" style={{ color: '#4A2E1A' }}>
                         <i className="bi bi-journal-text" style={{ color: '#6B4226' }}></i>
                         سجل الطلبات
                     </h1>
-                    <p className="text-muted fs-6">عرض وتصفية جميع الطلبات السابقة والحالية</p>
+                    <p className="text-muted fs-6 mb-0">عرض وتصفية جميع الطلبات السابقة والحالية</p>
+                </div>
+                <div className="col-md-4 text-end">
+                    <button 
+                        onClick={() => setShowTotals(!showTotals)}
+                        className="btn d-inline-flex align-items-center justify-content-center"
+                        title={showTotals ? 'إخفاء المبالغ' : 'إظهار المبالغ'}
+                        style={{
+                            backgroundColor: showTotals ? '#6B4226' : 'rgba(107,66,38,0.1)',
+                            color: showTotals ? '#fff' : '#6B4226',
+                            width: '42px',
+                            height: '42px',
+                            borderRadius: '10px',
+                            border: showTotals ? 'none' : '1px solid rgba(107,66,38,0.2)',
+                            boxShadow: showTotals ? '0 4px 10px rgba(107,66,38,0.2)' : 'none',
+                            transition: 'all 0.2s ease'
+                        }}
+                    >
+                        <i className={`bi ${showTotals ? 'bi-eye-slash-fill' : 'bi-eye-fill'}`} style={{ fontSize: '1.2rem' }}></i>
+                    </button>
                 </div>
             </div>
 
@@ -139,10 +159,11 @@ const OrderLogsPage = () => {
             <div className="row mb-4 g-3">
                 {[
                     { label: 'عدد الطلبات', value: pagination.total, icon: 'bi-receipt', color: '#4A2E1A' },
-                    { label: 'إجمالي القيمة', value: `${totalGross.toLocaleString()} ل.ت`, icon: 'bi-calculator', color: '#6B4226' },
-                    { label: 'إجمالي الخصومات', value: `${totalDiscounts.toLocaleString()} ل.ت`, icon: 'bi-percent', color: '#dc3545' },
-                    { label: 'صافي الدخل', value: `${totalAmount.toLocaleString()} ل.ت`, icon: 'bi-cash-stack', color: '#4A7C3F' },
-                    { label: 'مكتملة', value: completedCount, icon: 'bi-check-circle', color: '#CD853F' },
+                    { label: 'إجمالي القيمة', value: `${formatAmount(stats?.totalGross)} ل.ت`, icon: 'bi-calculator', color: '#6B4226' },
+                    { label: 'إجمالي الخصومات', value: `${formatAmount(stats?.totalDiscounts)} ل.ت`, icon: 'bi-percent', color: '#dc3545' },
+                    { label: 'صافي الدخل', value: `${formatAmount(stats?.totalAmount)} ل.ت`, icon: 'bi-cash-stack', color: '#4A7C3F' },
+                    { label: 'مكتملة', value: stats?.completedCount || 0, icon: 'bi-check-circle', color: '#CD853F' },
+                    // ...(dishFilter ? [{ label: `كمية (${dishFilter})`, value: stats?.dishTotalQuantity || 0, icon: 'bi-box-seam', color: '#E67E22' }] : [])
                 ].map((stat, i) => (
                     <div key={i} className="col-xl col-lg-4 col-sm-6">
                         <div className="card border-0 shadow-sm h-100">
@@ -287,7 +308,15 @@ const OrderLogsPage = () => {
                 </div>
             ) : (
                 Object.entries(groupedOrders).map(([dayLabel, dayOrders]) => {
-                    const dayTotal = dayOrders.reduce((sum, o) => sum + (o.totalAmount || 0), 0);
+                    const activeOrders = dayOrders.filter(o => o.status !== 'cancelled');
+                    const dayTotal = activeOrders.reduce((sum, o) => sum + (o.totalAmount || 0), 0);
+                    
+                    const dishCount = dishFilter ? activeOrders.reduce((sum, order) => {
+                        return sum + (order.items || [])
+                            .filter(item => item.name.toLowerCase().includes(dishFilter.toLowerCase()))
+                            .reduce((s, i) => s + (i.quantity || 0), 0);
+                    }, 0) : 0;
+
                     return (
                         <div key={dayLabel} className="mb-4">
                             {/* Day header */}
@@ -304,9 +333,16 @@ const OrderLogsPage = () => {
                                         <small className="text-muted">{dayOrders.length} طلبات</small>
                                     </div>
                                 </div>
-                                <span className="badge px-3 py-2" style={{ backgroundColor: 'rgba(107,66,38,0.08)', color: '#6B4226', fontSize: '0.85rem' }}>
-                                    {dayTotal.toLocaleString()} ل.ت
-                                </span>
+                                <div className="d-flex gap-2">
+                                    {dishFilter && (
+                                        <span className="badge px-3 py-2" style={{ backgroundColor: '#6B4226', color: '#fff', fontSize: '0.85rem', border: '1px solid #6B4226' }}>
+                                            الكمية: {dishCount}
+                                        </span>
+                                    )}
+                                    <span className="badge px-3 py-2" style={{ backgroundColor: 'rgba(107,66,38,0.08)', color: '#6B4226', fontSize: '0.85rem', border: '1px solid rgba(107,66,38,0.1)' }}>
+                                        صافي الإجمالي: {formatAmount(dayTotal)} ل.ت
+                                    </span>
+                                </div>
                             </div>
 
                             {/* Day orders */}
@@ -340,19 +376,19 @@ const OrderLogsPage = () => {
                                                         </td>
                                                         <td>
                                                             <small className="fw-bold text-muted">
-                                                                {(order.subtotal || (order.totalAmount + (order.discount || 0) + (order.tax || 0))).toLocaleString()} ل.ت
+                                                                {formatAmount(order.subtotal || (order.totalAmount + (order.discount || 0) + (order.tax || 0)))} ل.ت
                                                             </small>
                                                         </td>
                                                         <td className="text-danger">
                                                             {(order.discount || 0) + (order.tax || 0) > 0 ? (
                                                                 <small className="fw-bold">
-                                                                    -{((order.discount || 0) + (order.tax || 0)).toLocaleString()} ل.ت
+                                                                    -{formatAmount((order.discount || 0) + (order.tax || 0))} ل.ت
                                                                 </small>
                                                             ) : '-'}
                                                         </td>
                                                         <td>
                                                             <span className="fw-bold" style={{ color: '#4A7C3F' }}>
-                                                                {(order.totalAmount || 0).toLocaleString()} ل.ت
+                                                                {formatAmount(order.totalAmount)} ل.ت
                                                             </span>
                                                         </td>
                                                         <td>{getStatusBadge(order.status)}</td>
@@ -499,7 +535,7 @@ const OrderLogsPage = () => {
                                                 <div className="fw-bold" style={{ color: '#4A2E1A' }}>{item.name}</div>
                                                 <div className="d-flex align-items-center mt-1 gap-2">
                                                     <span className="badge" style={{ backgroundColor: 'rgba(107,66,38,0.1)', color: '#6B4226' }}>{item.quantity} ×</span>
-                                                    <small className="text-muted">{Number(item.price).toLocaleString()} ل.ت</small>
+                                                    <small className="text-muted">{formatAmount(item.price)} ل.ت</small>
                                                 </div>
                                                 {item.notes && (
                                                     <small className="text-muted d-block mt-1">
@@ -508,7 +544,7 @@ const OrderLogsPage = () => {
                                                 )}
                                             </div>
                                             <div className="fw-bold" style={{ color: '#6B4226' }}>
-                                                {(item.price * item.quantity).toLocaleString()} ل.ت
+                                                {formatAmount(item.price * item.quantity)} ل.ت
                                             </div>
                                         </div>
                                     ))}
@@ -528,24 +564,24 @@ const OrderLogsPage = () => {
                                 <div className="mt-3 p-3 rounded-3" style={{ backgroundColor: 'rgba(107,66,38,0.06)', border: '1px solid rgba(107,66,38,0.12)' }}>
                                     <div className="d-flex justify-content-between align-items-center mb-1 pb-1 border-bottom border-dashed" style={{ fontSize: '0.85rem' }}>
                                         <span className="text-muted">المجموع الفرعي:</span>
-                                        <span className="fw-semibold">{(viewingOrder.subtotal || (viewingOrder.totalAmount + (viewingOrder.discount || 0) + (viewingOrder.tax || 0))).toLocaleString()} ل.ت</span>
+                                        <span className="fw-semibold">{formatAmount(viewingOrder.subtotal || (viewingOrder.totalAmount + (viewingOrder.discount || 0) + (viewingOrder.tax || 0)))} ل.ت</span>
                                     </div>
                                     {viewingOrder.discount > 0 && (
                                         <div className="d-flex justify-content-between align-items-center mb-1 pb-1 border-bottom border-dashed text-danger" style={{ fontSize: '0.85rem' }}>
                                             <span>الخصم:</span>
-                                            <span>-{viewingOrder.discount.toLocaleString()} ل.ت</span>
+                                            <span>-{formatAmount(viewingOrder.discount)} ل.ت</span>
                                         </div>
                                     )}
                                     {viewingOrder.tax > 0 && (
                                         <div className="d-flex justify-content-between align-items-center mb-1 pb-1 border-bottom border-dashed text-danger" style={{ fontSize: '0.85rem' }}>
                                             <span>خصم بطاقة (5%):</span>
-                                            <span>-{viewingOrder.tax.toLocaleString()} ل.ت</span>
+                                            <span>-{formatAmount(viewingOrder.tax)} ل.ت</span>
                                         </div>
                                     )}
                                     <div className="d-flex justify-content-between align-items-center mt-2">
                                         <span className="fw-bold fs-5" style={{ color: '#4A2E1A' }}>الإجمالي:</span>
                                         <span className="fw-bold fs-4" style={{ color: '#6B4226' }}>
-                                            {(viewingOrder.totalAmount || 0).toLocaleString()} ل.ت
+                                            {formatAmount(viewingOrder.totalAmount)} ل.ت
                                         </span>
                                     </div>
                                 </div>
@@ -584,7 +620,7 @@ const OrderLogsPage = () => {
                                     <tr key={idx}>
                                         <td className="text-end py-1">{item.name}</td>
                                         <td className="text-center py-1">{item.quantity}</td>
-                                        <td className="text-start py-1">{(item.price * item.quantity).toLocaleString()}</td>
+                                        <td className="text-start py-1">{formatAmount(item.price * item.quantity)}</td>
                                     </tr>
                                 ))}
                             </tbody>
@@ -600,23 +636,23 @@ const OrderLogsPage = () => {
                     <div className="pt-2 border-top border-dashed">
                         <div className="d-flex justify-content-between" style={{ fontSize: '0.9rem' }}>
                             <span>المجموع الفرعي:</span>
-                            <span>{(viewingOrder.subtotal || (viewingOrder.totalAmount + (viewingOrder.discount || 0) + (viewingOrder.tax || 0))).toLocaleString()} ل.ت</span>
+                            <span>{formatAmount(viewingOrder.subtotal || (viewingOrder.totalAmount + (viewingOrder.discount || 0) + (viewingOrder.tax || 0)))} ل.ت</span>
                         </div>
                         {viewingOrder.discount > 0 && (
                             <div className="d-flex justify-content-between" style={{ fontSize: '0.9rem' }}>
                                 <span>الخصم:</span>
-                                <span>-{viewingOrder.discount.toLocaleString()} ل.ت</span>
+                                <span>-{formatAmount(viewingOrder.discount)} ل.ت</span>
                             </div>
                         )}
                         {viewingOrder.tax > 0 && (
                             <div className="d-flex justify-content-between" style={{ fontSize: '0.9rem' }}>
                                 <span>خصم بطاقة (5%):</span>
-                                <span>-{viewingOrder.tax.toLocaleString()} ل.ت</span>
+                                <span>-{formatAmount(viewingOrder.tax)} ل.ت</span>
                             </div>
                         )}
                         <div className="d-flex justify-content-between fw-bold mt-1" style={{ fontSize: '1.2rem', borderTop: '1px solid #000' }}>
                             <span>الإجمالي:</span>
-                            <span>{(viewingOrder.totalAmount || 0).toLocaleString()} ل.ت</span>
+                            <span>{formatAmount(viewingOrder.totalAmount)} ل.ت</span>
                         </div>
                     </div>
                     

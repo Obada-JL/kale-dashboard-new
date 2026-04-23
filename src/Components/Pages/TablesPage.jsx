@@ -295,26 +295,41 @@ const TablesPage = () => {
                 await fetchTableOrders(selectedTable._id);
             }
 
-            // Auto-print bar receipt
-            const currentOrderData = {
-                table: selectedTable || { number: selectedTable?.number || 'سفري' },
-                tableNumber: selectedTable?.number || null,
-                items: itemsPayload,
-                notes: orderNotes,
-                orderType,
-                createdAt: new Date().toISOString(),
-                discount: Number(discount) || 0,
-                tax: paymentMethod === 'credit_card' ? orderItemsSubtotal * 0.05 : 0
-            };
-            
-            handlePrintBarReceipt(currentOrderData, editingOrderId ? originalOrderItems : null);
-
             setShowOrderModal(false); // Close modal after successful order
         } catch (error) {
             handleApiError(error, editingOrderId ? 'تحديث طلب' : 'إنشاء طلب');
         } finally {
             setIsLoading(false);
         }
+    };
+
+    const handlePrintToBarOnly = (e) => {
+        e?.preventDefault();
+        if (orderItems.length === 0) {
+            toast.error('يرجى إضافة عنصر واحد على الأقل');
+            return;
+        }
+        
+        const itemsPayload = orderItems.map(item => ({
+            name: item.name,
+            nameTr: item.nameTr || '',
+            price: Number(item.price),
+            quantity: Number(item.quantity),
+            notes: item.notes || ''
+        }));
+
+        const currentOrderData = {
+            table: selectedTable || { number: selectedTable?.number || 'سفري' },
+            tableNumber: selectedTable?.number || null,
+            items: itemsPayload,
+            notes: orderNotes,
+            orderType,
+            createdAt: new Date().toISOString(),
+            discount: Number(discount) || 0,
+            tax: paymentMethod === 'credit_card' ? orderItemsSubtotal * 0.05 : 0
+        };
+        
+        handlePrintBarReceipt(currentOrderData, editingOrderId ? originalOrderItems : null);
     };
 
     const handleOrderStatus = async (orderId, status, pMethod) => {
@@ -1361,18 +1376,31 @@ const TablesPage = () => {
                                                 </div>
                                             )}
 
-                                            <button onClick={handleCreateOrder} className="btn text-white w-100 mb-4 d-flex gap-2 align-items-center justify-content-center"
-                                                style={{ background: editingOrderId ? 'linear-gradient(135deg, #CD853F, #DEB887)' : 'linear-gradient(135deg, #6B4226, #CD853F)', borderRadius: '10px' }}
-                                                disabled={isLoading || orderItems.length === 0}>
-                                                {isLoading 
-                                                    ? <><span className="spinner-border spinner-border-sm me-2"></span>{editingOrderId ? 'جاري التحديث...' : 'جاري الإنشاء...'}</>
-                                                    : editingOrderId 
-                                                        ? <><i className="bi bi-pencil-square me-2"></i>تحديث الطلب ({orderItems.length} عنصر)</>
-                                                        : <><i className="bi bi-receipt me-2"></i>إنشاء طلب ({orderItems.length} عنصر)</>}
-                                            </button>
+                                            <div className="d-flex gap-2 mb-4">
+                                                <button onClick={(e) => handleCreateOrder(e)} className="btn text-white flex-grow-1 d-flex gap-2 align-items-center justify-content-center"
+                                                    style={{ background: editingOrderId ? 'linear-gradient(135deg, #CD853F, #DEB887)' : 'linear-gradient(135deg, #6B4226, #CD853F)', borderRadius: '10px' }}
+                                                    disabled={isLoading || orderItems.length === 0}>
+                                                    {isLoading 
+                                                        ? <><span className="spinner-border spinner-border-sm me-2"></span>{editingOrderId ? 'جاري التحديث...' : 'جاري الإنشاء...'}</>
+                                                        : editingOrderId 
+                                                            ? <><i className="bi bi-pencil-square me-2"></i>حفظ ({orderItems.length})</>
+                                                            : <><i className="bi bi-check-circle me-2"></i>حفظ ({orderItems.length})</>}
+                                                </button>
+                                                <button onClick={handlePrintToBarOnly} className="btn d-flex gap-2 align-items-center justify-content-center"
+                                                    style={{ 
+                                                        backgroundColor: 'rgba(107,66,38,0.08)', 
+                                                        color: '#6B4226', 
+                                                        border: '1px solid rgba(107,66,38,0.2)',
+                                                        borderRadius: '10px',
+                                                        width: '25%'
+                                                    }}
+                                                    disabled={isLoading || orderItems.length === 0}>
+                                                    <i className="bi bi-printer"></i>طباعة
+                                                </button>
+                                            </div>
 
                                             {/* Active Orders for this Table */}
-                                            {tableOrders.filter(o => o.status === 'active').length > 0 && (
+                                            {/* {tableOrders.filter(o => o.status === 'active').length > 0 && (
                                                 <div className="border-top pt-3">
                                                     <h6 className="fw-bold mb-2" style={{ color: '#4A2E1A', fontSize: '0.9rem' }}>
                                                         <i className="bi bi-receipt me-2"></i>طلبات نشطة لهذه الطاولة
@@ -1445,7 +1473,7 @@ const TablesPage = () => {
                                                         </div>
                                                     ))}
                                                 </div>
-                                            )}
+                                            )} */}
 
                                             {/* Past Orders */}
                                             {/* {tableOrders.filter(o => o.status !== 'active').length > 0 && (
