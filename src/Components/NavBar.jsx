@@ -54,7 +54,7 @@ export default function NavBar() {
 
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="me-auto">
-            {user?.role !== 'employee' && (
+            {user?.role !== 'staff' && (
               <Nav.Link
                 as={Link}
                 to="/"
@@ -67,7 +67,7 @@ export default function NavBar() {
             )}
 
             {/* Menu Management Dropdown - hidden for employees */}
-            {user?.role !== 'employee' && (
+            {user?.role !== 'staff' && (
               <NavDropdown
                 title={
                   <span className="fw-semibold">
@@ -137,7 +137,7 @@ export default function NavBar() {
               إدارة الطاولات
             </Nav.Link>
 
-            {user?.role !== 'employee' && (
+            {user?.role !== 'staff' && (
               <Nav.Link
                 as={Link}
                 to="/order-logs"

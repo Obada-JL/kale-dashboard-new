@@ -13,7 +13,7 @@ const UsersPage = () => {
         username: '',
         email: '',
         password: '',
-        role: 'employee',
+        role: 'staff',
         nameTr: ''
     });
     const { user: currentUser } = useAuth();
@@ -44,7 +44,7 @@ const UsersPage = () => {
         try {
             setIsLoading(true);
             await apiService.users.create(newUser);
-            setNewUser({ username: '', email: '', password: '', role: 'employee', nameTr: '' });
+            setNewUser({ username: '', email: '', password: '', role: 'staff', nameTr: '' });
             setShowCreateForm(false);
             await fetchUsers();
             toast.success('تم إنشاء المستخدم بنجاح');
@@ -100,7 +100,7 @@ const UsersPage = () => {
     const getRoleBadgeColor = (role) => {
         switch (role) {
             case 'admin': return 'bg-danger';
-            case 'employee': return 'bg-success';
+            case 'staff': return 'bg-success';
             default: return 'bg-secondary';
         }
     };
@@ -108,7 +108,7 @@ const UsersPage = () => {
     const getRoleArabic = (role) => {
         switch (role) {
             case 'admin': return 'مدير';
-            case 'employee': return 'موظف';
+            case 'staff': return 'موظف';
             default: return role;
         }
     };
@@ -180,7 +180,7 @@ const UsersPage = () => {
                     <div className="card border-0 shadow-sm bg-info text-white">
                         <div className="card-body text-center">
                             <i className="bi bi-people-fill fs-1 mb-2"></i>
-                            <h3 className="fw-bold">{users.filter(u => u.role === 'employee').length}</h3>
+                            <h3 className="fw-bold">{users.filter(u => u.role === 'staff').length}</h3>
                             <p className="mb-0">الموظفين</p>
                         </div>
                     </div>
@@ -347,7 +347,7 @@ const UsersPage = () => {
                                                 className="form-select"
                                                 disabled={isLoading}
                                             >
-                                                <option value="employee">موظف</option>
+                                                <option value="staff">موظف</option>
                                                 <option value="admin">مدير</option>
                                             </select>
                                         </div>
@@ -370,7 +370,7 @@ const UsersPage = () => {
                                         type="button"
                                         onClick={() => {
                                             setShowCreateForm(false);
-                                            setNewUser({ username: '', email: '', password: '', role: 'employee' });
+                                            setNewUser({ username: '', email: '', password: '', role: 'staff' });
                                         }}
                                         className="btn btn-secondary"
                                         disabled={isLoading}
@@ -448,7 +448,7 @@ const UsersPage = () => {
                                                 className="form-select"
                                                 disabled={isLoading}
                                             >
-                                                <option value="employee">موظف</option>
+                                                <option value="staff">موظف</option>
                                                 <option value="admin">مدير</option>
                                             </select>
                                         </div>
