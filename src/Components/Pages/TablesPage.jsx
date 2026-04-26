@@ -17,7 +17,7 @@ const TablesPage = () => {
     const [showOrderModal, setShowOrderModal] = useState(false);
     const [viewingOrder, setViewingOrder] = useState(null);
     const { user } = useAuth();
-    const isStaff = user?.role === 'employee';
+    const isStaff = user?.role === 'staff';
 
     const confirm = useConfirm();
 
@@ -244,7 +244,7 @@ const TablesPage = () => {
         setOrderItems(orderItems.filter((_, i) => i !== index));
     };
 
-    const handleCreateOrder = async (e) => {
+    const handleCreateOrder = async (e, shouldComplete = false) => {
         e?.preventDefault();
         if (orderItems.length === 0) {
             toast.error('يرجى إضافة عنصر واحد على الأقل');
@@ -252,7 +252,6 @@ const TablesPage = () => {
         }
         try {
             setIsLoading(true);
-            console.log(orderItems);
             const itemsPayload = orderItems.map(item => ({
                 name: item.name,
                 nameTr: item.nameTr || '',
@@ -260,6 +259,8 @@ const TablesPage = () => {
                 quantity: Number(item.quantity),
                 notes: item.notes || ''
             }));
+
+            let orderId = editingOrderId;
 
             if (editingOrderId) {
                 // Update existing order
@@ -274,7 +275,7 @@ const TablesPage = () => {
                 toast.success('تم تحديث الطلب بنجاح');
             } else {
                 // Create new order
-                await apiService.orders.add({
+                const response = await apiService.orders.add({
                     table: selectedTable?._id || null,
                     tableNumber: selectedTable?.number || null,
                     items: itemsPayload,
@@ -284,8 +285,16 @@ const TablesPage = () => {
                     paymentMethod,
                     discount: Number(discount) || 0
                 });
+                orderId = response.data._id;
                 toast.success('تم إنشاء الطلب بنجاح');
             }
+
+            // Handle immediate completion if requested
+            if (shouldComplete && orderId) {
+                await apiService.orders.updateStatus(orderId, 'completed', paymentMethod);
+                toast.success('تم إكمال الطلب بنجاح');
+            }
+
             setOrderItems([]);
             setOrderNotes('');
             setEditingOrderId(null);
@@ -295,11 +304,23 @@ const TablesPage = () => {
                 await fetchTableOrders(selectedTable._id);
             }
 
-            setShowOrderModal(false); // Close modal after successful order
+            setShowOrderModal(false); 
         } catch (error) {
             handleApiError(error, editingOrderId ? 'تحديث طلب' : 'إنشاء طلب');
         } finally {
             setIsLoading(false);
+        }
+    };
+
+    const handleSaveAndCompleteOrder = async (e) => {
+        const confirmed = await confirm({
+            title: 'إكمال الطلب',
+            message: 'هل أنت متأكد من حفظ وإكمال هذا الطلب؟',
+            confirmText: 'حفظ وإكمال',
+            variant: 'success',
+        });
+        if (confirmed) {
+            await handleCreateOrder(e, true);
         }
     };
 
@@ -1437,41 +1458,25 @@ const TablesPage = () => {
                                                 </div>
                                             )}
 
-                                            <div className="d-flex gap-2 mb-4">
+                                            <div className="d-flex gap-2 mb-2">
                                                 <button onClick={(e) => handleCreateOrder(e)} className="btn text-white flex-grow-1 d-flex gap-2 align-items-center justify-content-center"
-                                                    style={{ background: editingOrderId ? 'linear-gradient(135deg, #CD853F, #DEB887)' : 'linear-gradient(135deg, #6B4226, #CD853F)', borderRadius: '10px' }}
+                                                    style={{ background: editingOrderId ? 'linear-gradient(135deg, #CD853F, #DEB887)' : 'linear-gradient(135deg, #6B4226, #CD853F)', borderRadius: '10px', padding: '12px' }}
                                                     disabled={isLoading || orderItems.length === 0}>
                                                     {isLoading 
-                                                        ? <><span className="spinner-border spinner-border-sm me-2"></span>{editingOrderId ? 'جاري التحديث...' : 'جاري الإنشاء...'}</>
+                                                        ? <><span className="spinner-border spinner-border-sm me-2"></span>جاري...</>
                                                         : editingOrderId 
-                                                            ? <><i className="bi bi-pencil-square me-2"></i>حفظ ({orderItems.length})</>
-                                                            : <><i className="bi bi-check-circle me-2"></i>حفظ ({orderItems.length})</>}
+                                                            ? <><i className="bi bi-pencil-square me-2"></i>حفظ التعديلات ({orderItems.length})</>
+                                                            : <><i className="bi bi-check-circle me-2"></i>حفظ الطلب ({orderItems.length})</>}
                                                 </button>
-                                                <button onClick={handlePrintToBarOnly} className="btn d-flex gap-2 align-items-center justify-content-center"
-                                                    style={{ 
-                                                        backgroundColor: 'rgba(107,66,38,0.08)', 
-                                                        color: '#6B4226', 
-                                                        border: '1px solid rgba(107,66,38,0.2)',
-                                                        borderRadius: '10px',
-                                                        width: '25%'
-                                                    }}
+                                                <button onClick={(e) => handleSaveAndCompleteOrder(e)} className="btn text-white d-flex gap-2 align-items-center justify-content-center"
+                                                    style={{ backgroundColor: '#4A2E1A', borderRadius: '10px', width: '60px' }}
+                                                    title="إكمال الطلب"
                                                     disabled={isLoading || orderItems.length === 0}>
-                                                    <i className="bi bi-printer"></i>طباعة بار
+                                                    <i className="bi bi-check-all fs-4"></i>
                                                 </button>
                                             </div>
 
                                             <div className="d-flex gap-2 mb-4">
-                                                <button onClick={() => handlePrintReceiptFromModal('ar')} className="btn d-flex gap-2 align-items-center justify-content-center"
-                                                    style={{ 
-                                                        backgroundColor: 'rgba(107,66,38,0.08)', 
-                                                        color: '#6B4226', 
-                                                        border: '1px solid rgba(107,66,38,0.2)',
-                                                        borderRadius: '10px',
-                                                        flex: 1
-                                                    }}
-                                                    disabled={isLoading || orderItems.length === 0}>
-                                                    <i className="bi bi-printer"></i> فاتورة AR
-                                                </button>
                                                 <button onClick={() => handlePrintReceiptFromModal('tr')} className="btn d-flex gap-2 align-items-center justify-content-center"
                                                     style={{ 
                                                         backgroundColor: 'rgba(107,66,38,0.08)', 
@@ -1481,7 +1486,29 @@ const TablesPage = () => {
                                                         flex: 1
                                                     }}
                                                     disabled={isLoading || orderItems.length === 0}>
-                                                    <i className="bi bi-printer"></i> Fiş TR
+                                                    <i className="bi bi-printer me-2"></i> Fiş TR
+                                                </button>
+                                                <button onClick={() => handlePrintReceiptFromModal('ar')} className="btn d-flex gap-2 align-items-center justify-content-center"
+                                                    style={{ 
+                                                        backgroundColor: 'rgba(107,66,38,0.08)', 
+                                                        color: '#6B4226', 
+                                                        border: '1px solid rgba(107,66,38,0.2)',
+                                                        borderRadius: '10px',
+                                                        flex: 1
+                                                    }}
+                                                    disabled={isLoading || orderItems.length === 0}>
+                                                    <i className="bi bi-printer me-2"></i> فاتورة AR
+                                                </button>
+                                                <button onClick={handlePrintToBarOnly} className="btn d-flex gap-2 align-items-center justify-content-center"
+                                                    style={{ 
+                                                        backgroundColor: 'rgba(107,66,38,0.15)', 
+                                                        color: '#4A2E1A', 
+                                                        border: '2px dashed rgba(107,66,38,0.3)',
+                                                        borderRadius: '10px',
+                                                        flex: 1
+                                                    }}
+                                                    disabled={isLoading || orderItems.length === 0}>
+                                                    <i className="bi bi-cup-hot me-2"></i>طلب بار
                                                 </button>
                                             </div>
 
