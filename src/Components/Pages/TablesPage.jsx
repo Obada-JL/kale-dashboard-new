@@ -184,7 +184,7 @@ const TablesPage = () => {
                     notes: item.notes || ''
                 })) || [];
                 setOrderItems(items);
-                setOriginalOrderItems([...items]);
+                setOriginalOrderItems(items.map(i => ({ ...i })));
                 setOrderNotes(activeOrder.notes || '');
                 setDiscount(activeOrder.discount || 0);
             }
@@ -214,7 +214,7 @@ const TablesPage = () => {
         const existingIndex = orderItems.findIndex(oi => oi.name === item.name);
         if (existingIndex >= 0) {
             const updated = [...orderItems];
-            updated[existingIndex].quantity += 1;
+            updated[existingIndex] = { ...updated[existingIndex], quantity: updated[existingIndex].quantity + 1 };
             setOrderItems(updated);
         } else {
             console.log(item);
@@ -230,13 +230,13 @@ const TablesPage = () => {
 
     const handleOrderItemQuantity = (index, delta) => {
         const updated = [...orderItems];
-        updated[index].quantity = Math.max(1, updated[index].quantity + delta);
+        updated[index] = { ...updated[index], quantity: Math.max(1, updated[index].quantity + delta) };
         setOrderItems(updated);
     };
 
     const handleOrderItemNotes = (index, notes) => {
         const updated = [...orderItems];
-        updated[index].notes = notes;
+        updated[index] = { ...updated[index], notes };
         setOrderItems(updated);
     };
 
@@ -329,7 +329,9 @@ const TablesPage = () => {
             tax: paymentMethod === 'credit_card' ? orderItemsSubtotal * 0.05 : 0
         };
         
-        handlePrintBarReceipt(currentOrderData, editingOrderId ? originalOrderItems : null);
+        handlePrintBarReceipt(currentOrderData, originalOrderItems);
+        // Update originalOrderItems so that subsequent clicks only print new deltas
+        setOriginalOrderItems(orderItems.map(item => ({ ...item })));
     };
 
     const handleOrderStatus = async (orderId, status, pMethod) => {
@@ -409,6 +411,35 @@ const TablesPage = () => {
             console.error('Bar print error:', error);
             toast.error('فشل إرسال طلب البار');
         }
+    };
+    
+    const handlePrintReceiptFromModal = (lang) => {
+        if (orderItems.length === 0) {
+            toast.error('يرجى إضافة عنصر واحد على الأقل');
+            return;
+        }
+        
+        const itemsPayload = orderItems.map(item => ({
+            name: item.name,
+            nameTr: item.nameTr || '',
+            price: Number(item.price),
+            quantity: Number(item.quantity),
+            notes: item.notes || ''
+        }));
+
+        const currentOrderData = {
+            table: selectedTable || { number: selectedTable?.number || 'سفري' },
+            tableNumber: selectedTable?.number || null,
+            items: itemsPayload,
+            notes: orderNotes,
+            orderType,
+            createdAt: new Date().toISOString(),
+            discount: Number(discount) || 0,
+            tax: paymentMethod === 'credit_card' ? orderItemsSubtotal * 0.05 : 0,
+            totalAmount: orderTotal
+        };
+        
+        handlePrintReceipt(currentOrderData, lang);
     };
 
     const handleExportToExcel = () => {
@@ -1395,7 +1426,32 @@ const TablesPage = () => {
                                                         width: '25%'
                                                     }}
                                                     disabled={isLoading || orderItems.length === 0}>
-                                                    <i className="bi bi-printer"></i>طباعة
+                                                    <i className="bi bi-printer"></i>طباعة بار
+                                                </button>
+                                            </div>
+
+                                            <div className="d-flex gap-2 mb-4">
+                                                <button onClick={() => handlePrintReceiptFromModal('ar')} className="btn d-flex gap-2 align-items-center justify-content-center"
+                                                    style={{ 
+                                                        backgroundColor: 'rgba(107,66,38,0.08)', 
+                                                        color: '#6B4226', 
+                                                        border: '1px solid rgba(107,66,38,0.2)',
+                                                        borderRadius: '10px',
+                                                        flex: 1
+                                                    }}
+                                                    disabled={isLoading || orderItems.length === 0}>
+                                                    <i className="bi bi-printer"></i> فاتورة AR
+                                                </button>
+                                                <button onClick={() => handlePrintReceiptFromModal('tr')} className="btn d-flex gap-2 align-items-center justify-content-center"
+                                                    style={{ 
+                                                        backgroundColor: 'rgba(107,66,38,0.08)', 
+                                                        color: '#6B4226', 
+                                                        border: '1px solid rgba(107,66,38,0.2)',
+                                                        borderRadius: '10px',
+                                                        flex: 1
+                                                    }}
+                                                    disabled={isLoading || orderItems.length === 0}>
+                                                    <i className="bi bi-printer"></i> Fiş TR
                                                 </button>
                                             </div>
 
