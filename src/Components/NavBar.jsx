@@ -54,7 +54,7 @@ export default function NavBar() {
 
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="me-auto">
-            {user?.role !== 'staff' && (
+            {user?.role !== 'employee' && (
               <Nav.Link
                 as={Link}
                 to="/"
@@ -67,7 +67,7 @@ export default function NavBar() {
             )}
 
             {/* Menu Management Dropdown - hidden for employees */}
-            {user?.role !== 'staff' && (
+            {user?.role !== 'employee' && (
               <NavDropdown
                 title={
                   <span className="fw-semibold">
@@ -137,7 +137,7 @@ export default function NavBar() {
               إدارة الطاولات
             </Nav.Link>
 
-            {user?.role !== 'staff' && (
+            {user?.role !== 'employee' && (
               <Nav.Link
                 as={Link}
                 to="/order-logs"
@@ -167,7 +167,7 @@ export default function NavBar() {
               <div className="text-end me-2">
                 <div className="fw-semibold text-dark small">{user?.username}</div>
                 <div className="text-muted" style={{ fontSize: '0.75rem' }}>
-                  {user?.role === 'admin' ? 'مدير' : user?.role === 'manager' ? 'مشرف' : 'موظف'}
+                  {user?.role === 'admin' ? 'مدير' : 'موظف'}
                 </div>
               </div>
               <div className="rounded-circle d-flex align-items-center justify-content-center"

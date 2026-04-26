@@ -17,7 +17,7 @@ const TablesPage = () => {
     const [showOrderModal, setShowOrderModal] = useState(false);
     const [viewingOrder, setViewingOrder] = useState(null);
     const { user } = useAuth();
-    const isStaff = user?.role === 'staff';
+    const isStaff = user?.role === 'employee';
 
     const confirm = useConfirm();
 
@@ -326,12 +326,37 @@ const TablesPage = () => {
             orderType,
             createdAt: new Date().toISOString(),
             discount: Number(discount) || 0,
-            tax: paymentMethod === 'credit_card' ? orderItemsSubtotal * 0.05 : 0
+            tax: paymentMethod === 'credit_card' ? orderItemsSubtotal * 0.05 : 0,
+            createdBy: user?.username || ''
         };
         
         handlePrintBarReceipt(currentOrderData, originalOrderItems);
         // Update originalOrderItems so that subsequent clicks only print new deltas
         setOriginalOrderItems(orderItems.map(item => ({ ...item })));
+    };
+
+    const handlePrintSingleItemToBar = (item) => {
+        const itemPayload = [{
+            name: item.name,
+            nameTr: item.nameTr || '',
+            price: Number(item.price),
+            quantity: Number(item.quantity),
+            notes: item.notes || ''
+        }];
+
+        const currentOrderData = {
+            table: selectedTable || { number: selectedTable?.number || 'سفري' },
+            tableNumber: selectedTable?.number || null,
+            items: itemPayload,
+            notes: '', 
+            orderType,
+            createdAt: new Date().toISOString(),
+            discount: 0,
+            tax: 0,
+            createdBy: user?.username || ''
+        };
+        
+        handlePrintBarReceipt(currentOrderData, null);
     };
 
     const handleOrderStatus = async (orderId, status, pMethod) => {
@@ -436,7 +461,8 @@ const TablesPage = () => {
             createdAt: new Date().toISOString(),
             discount: Number(discount) || 0,
             tax: paymentMethod === 'credit_card' ? orderItemsSubtotal * 0.05 : 0,
-            totalAmount: orderTotal
+            totalAmount: orderTotal,
+            createdBy: user?.username || ''
         };
         
         handlePrintReceipt(currentOrderData, lang);
@@ -887,21 +913,19 @@ const TablesPage = () => {
                                                                 <i className="bi bi-cup-straw"></i>Bar
                                                             </button>
                                                             <div className="vr mx-1"></div>
+                                                            <button className="btn btn-sm text-white d-flex align-items-center gap-1"
+                                                                style={{ backgroundColor: '#4A2E1A', fontSize: '0.75rem' }}
+                                                                onClick={() => handleOrderStatus(order._id, 'completed', order.paymentMethod)}
+                                                                disabled={isLoading}>
+                                                                <i className="bi bi-check-lg"></i>إكمال
+                                                            </button>
                                                             {!isStaff && (
-                                                                <>
-                                                                    <button className="btn btn-sm text-white d-flex align-items-center gap-1"
-                                                                        style={{ backgroundColor: '#4A2E1A', fontSize: '0.75rem' }}
-                                                                        onClick={() => handleOrderStatus(order._id, 'completed', order.paymentMethod)}
-                                                                        disabled={isLoading}>
-                                                                        <i className="bi bi-check-lg"></i>إكمال
-                                                                    </button>
-                                                                    <button className="btn btn-sm btn-outline-danger d-flex align-items-center gap-1"
-                                                                        style={{ fontSize: '0.75rem' }}
-                                                                        onClick={() => handleOrderStatus(order._id, 'cancelled')}
-                                                                        disabled={isLoading}>
-                                                                        <i className="bi bi-x-lg"></i>إلغاء
-                                                                    </button>
-                                                                </>
+                                                                <button className="btn btn-sm btn-outline-danger d-flex align-items-center gap-1"
+                                                                    style={{ fontSize: '0.75rem' }}
+                                                                    onClick={() => handleOrderStatus(order._id, 'cancelled')}
+                                                                    disabled={isLoading}>
+                                                                    <i className="bi bi-x-lg"></i>إلغاء
+                                                                </button>
                                                             )}
 
                                                         </div>
@@ -1341,6 +1365,12 @@ const TablesPage = () => {
                                                                 <span className="fw-bold" style={{ color: '#6B4226', fontSize: '0.85rem', minWidth: '60px', textAlign: 'left' }}>
                                                                     {(item.price * item.quantity).toLocaleString()}
                                                                 </span>
+                                                                <button className="btn btn-sm btn-outline-dark" 
+                                                                    style={{ padding: '1px 6px', fontSize: '0.7rem', color: '#6B4226', borderColor: 'rgba(107,66,38,0.2)' }}
+                                                                    onClick={() => handlePrintSingleItemToBar(item)}
+                                                                    title="طباعة للصالة">
+                                                                    <i className="bi bi-printer"></i>
+                                                                </button>
                                                                 <button className="btn btn-sm btn-outline-danger" style={{ padding: '1px 6px', fontSize: '0.7rem' }}
                                                                     onClick={() => handleRemoveOrderItem(index)}>
                                                                     <i className="bi bi-x"></i>
@@ -1497,13 +1527,13 @@ const TablesPage = () => {
                                                                                 title="طباعة بار">
                                                                                 <i className="bi bi-cup-straw"></i> Bar
                                                                             </button>
+                                                                            <button className="btn btn-sm text-white"
+                                                                                style={{ backgroundColor: '#4A2E1A', fontSize: '0.65rem', padding: '1px 6px' }}
+                                                                                onClick={() => handleOrderStatus(order._id, 'completed', paymentMethod)}>
+                                                                                <i className="bi bi-check-lg"></i>
+                                                                            </button>
                                                                             {!isStaff && (
                                                                                 <>
-                                                                                    <button className="btn btn-sm text-white"
-                                                                                        style={{ backgroundColor: '#4A2E1A', fontSize: '0.65rem', padding: '1px 6px' }}
-                                                                                        onClick={() => handleOrderStatus(order._id, 'completed', paymentMethod)}>
-                                                                                        <i className="bi bi-check-lg"></i>
-                                                                                    </button>
                                                                                     <button className="btn btn-sm btn-outline-danger"
                                                                                         style={{ fontSize: '0.65rem', padding: '1px 6px' }}
                                                                                         onClick={() => handleOrderStatus(order._id, 'cancelled')}>

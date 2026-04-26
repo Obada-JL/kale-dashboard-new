@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import { apiService, handleApiError } from '../../config/apiService';
 import { useAuth } from '../../context/AuthContext';
+import { FiX } from 'react-icons/fi';
 
 const UsersPage = () => {
     const [users, setUsers] = useState([]);
@@ -12,8 +13,7 @@ const UsersPage = () => {
         username: '',
         email: '',
         password: '',
-        role: 'staff',
-        isCashier: false,
+        role: 'employee',
         nameTr: ''
     });
     const { user: currentUser } = useAuth();
@@ -44,7 +44,7 @@ const UsersPage = () => {
         try {
             setIsLoading(true);
             await apiService.users.create(newUser);
-            setNewUser({ username: '', email: '', password: '', role: 'staff', isCashier: false, nameTr: '' });
+            setNewUser({ username: '', email: '', password: '', role: 'employee', nameTr: '' });
             setShowCreateForm(false);
             await fetchUsers();
             toast.success('تم إنشاء المستخدم بنجاح');
@@ -69,8 +69,8 @@ const UsersPage = () => {
                 email: editingUser.email,
                 role: editingUser.role,
                 isActive: editingUser.isActive,
-                isCashier: editingUser.isCashier,
-                nameTr: editingUser.nameTr
+                nameTr: editingUser.nameTr,
+                password: editingUser.newPassword // Include new password if set
             });
             setEditingUser(null);
             await fetchUsers();
@@ -100,8 +100,7 @@ const UsersPage = () => {
     const getRoleBadgeColor = (role) => {
         switch (role) {
             case 'admin': return 'bg-danger';
-            case 'manager': return 'bg-primary';
-            case 'staff': return 'bg-success';
+            case 'employee': return 'bg-success';
             default: return 'bg-secondary';
         }
     };
@@ -109,8 +108,7 @@ const UsersPage = () => {
     const getRoleArabic = (role) => {
         switch (role) {
             case 'admin': return 'مدير';
-            case 'manager': return 'مشرف';
-            case 'staff': return 'موظف';
+            case 'employee': return 'موظف';
             default: return role;
         }
     };
@@ -182,7 +180,7 @@ const UsersPage = () => {
                     <div className="card border-0 shadow-sm bg-info text-white">
                         <div className="card-body text-center">
                             <i className="bi bi-people-fill fs-1 mb-2"></i>
-                            <h3 className="fw-bold">{users.filter(u => u.role === 'staff').length}</h3>
+                            <h3 className="fw-bold">{users.filter(u => u.role === 'employee').length}</h3>
                             <p className="mb-0">الموظفين</p>
                         </div>
                     </div>
@@ -221,12 +219,6 @@ const UsersPage = () => {
                                                             {user.username}
                                                             {user._id === currentUser.id && (
                                                                 <span className="badge bg-info ms-2">أنت</span>
-                                                            )}
-                                                            {user.isCashier && (
-                                                                <span className="badge bg-warning text-dark ms-2">
-                                                                    <i className="bi bi-cash-stack me-1"></i>
-                                                                    كاشير
-                                                                </span>
                                                             )}
                                                             {user.nameTr && (
                                                                 <span className="text-primary ms-2">({user.nameTr})</span>
@@ -298,15 +290,14 @@ const UsersPage = () => {
                 <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
                     <div className="modal-dialog modal-lg modal-dialog-centered">
                         <div className="modal-content">
-                            <div className="modal-header">
+                            <div className="modal-header d-flex justify-content-between">
                                 <h5 className="modal-title">
                                     <i className="bi bi-person-plus me-2"></i>
                                     إضافة مستخدم جديد
                                 </h5>
-                                <button
-                                    onClick={() => setShowCreateForm(false)}
-                                    className="btn-close"
-                                ></button>
+                                <button onClick={() => setShowCreateForm(false)} className="btn btn-danger">
+                                    <FiX />
+                                </button>
                             </div>
                             <form onSubmit={handleCreateUser}>
                                 <div className="modal-body">
@@ -356,26 +347,11 @@ const UsersPage = () => {
                                                 className="form-select"
                                                 disabled={isLoading}
                                             >
-                                                <option value="staff">موظف</option>
-                                                <option value="manager">مشرف</option>
+                                                <option value="employee">موظف</option>
                                                 <option value="admin">مدير</option>
                                             </select>
                                         </div>
-                                        <div className="col-md-6">
-                                            <div className="form-check mt-4">
-                                                <input
-                                                    type="checkbox"
-                                                    id="newIsCashier"
-                                                    checked={newUser.isCashier}
-                                                    onChange={(e) => setNewUser({ ...newUser, isCashier: e.target.checked })}
-                                                    className="form-check-input"
-                                                    disabled={isLoading}
-                                                />
-                                                <label className="form-check-label fw-semibold" htmlFor="newIsCashier">
-                                                    تعيين ككاشير
-                                                </label>
-                                            </div>
-                                        </div>
+
                                         <div className="col-md-6">
                                             <label className="form-label fw-semibold">الاسم بالتركية (للفاتورة)</label>
                                             <input
@@ -394,7 +370,7 @@ const UsersPage = () => {
                                         type="button"
                                         onClick={() => {
                                             setShowCreateForm(false);
-                                            setNewUser({ username: '', email: '', password: '', role: 'staff' });
+                                            setNewUser({ username: '', email: '', password: '', role: 'employee' });
                                         }}
                                         className="btn btn-secondary"
                                         disabled={isLoading}
@@ -430,15 +406,14 @@ const UsersPage = () => {
                 <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
                     <div className="modal-dialog modal-lg modal-dialog-centered">
                         <div className="modal-content">
-                            <div className="modal-header">
+                            <div className="modal-header d-flex justify-content-between">
                                 <h5 className="modal-title">
                                     <i className="bi bi-pencil me-2"></i>
                                     تعديل المستخدم
                                 </h5>
-                                <button
-                                    onClick={() => setEditingUser(null)}
-                                    className="btn-close"
-                                ></button>
+                                <button onClick={() => setEditingUser(null)} className="btn btn-danger">
+                                    <FiX />
+                                </button>
                             </div>
                             <form onSubmit={handleUpdateUser}>
                                 <div className="modal-body">
@@ -473,8 +448,7 @@ const UsersPage = () => {
                                                 className="form-select"
                                                 disabled={isLoading}
                                             >
-                                                <option value="staff">موظف</option>
-                                                <option value="manager">مشرف</option>
+                                                <option value="employee">موظف</option>
                                                 <option value="admin">مدير</option>
                                             </select>
                                         </div>
@@ -494,19 +468,16 @@ const UsersPage = () => {
                                             </div>
                                         </div>
                                         <div className="col-md-6">
-                                            <div className="form-check mt-4">
-                                                <input
-                                                    type="checkbox"
-                                                    id="editIsCashier"
-                                                    checked={editingUser.isCashier}
-                                                    onChange={(e) => setEditingUser({ ...editingUser, isCashier: e.target.checked })}
-                                                    className="form-check-input"
-                                                    disabled={isLoading}
-                                                />
-                                                <label className="form-check-label fw-semibold" htmlFor="editIsCashier">
-                                                    تعيين ككاشير
-                                                </label>
-                                            </div>
+                                            <label className="form-label fw-semibold text-primary">تغيير كلمة المرور (اختياري)</label>
+                                            <input
+                                                type="password"
+                                                value={editingUser.newPassword || ''}
+                                                onChange={(e) => setEditingUser({ ...editingUser, newPassword: e.target.value })}
+                                                className="form-control border-primary"
+                                                placeholder="اتركه فارغاً للإبقاء على الحالية"
+                                                disabled={isLoading}
+                                                minLength={6}
+                                            />
                                         </div>
                                         <div className="col-md-6">
                                             <label className="form-label fw-semibold">الاسم بالتركية (للفاتورة)</label>

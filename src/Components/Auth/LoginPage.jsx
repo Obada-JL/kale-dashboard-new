@@ -48,223 +48,118 @@ const LoginPage = () => {
     };
 
     return (
-        <div style={{
-            background: 'linear-gradient(135deg, #8B4513 0%, #D2B48C 50%, #CD853F 100%)',
+        <div dir="rtl" style={{
+            backgroundColor: 'var(--bs-kale-cream, #F5EDE3)',
             minHeight: '100vh',
-            position: 'relative'
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '20px',
+            position: 'relative',
+            fontFamily: "'Cairo', sans-serif"
         }}>
-            {/* Background decoration */}
-            <div style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                background: 'url("data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'><defs><pattern id=\'grain\' width=\'100\' height=\'100\' patternUnits=\'userSpaceOnUse\'><circle cx=\'50\' cy=\'50\' r=\'1\' fill=\'%23ffffff\' opacity=\'0.1\'/></pattern></defs><rect width=\'100\' height=\'100\' fill=\'url(%23grain)\'/></svg>")',
-                opacity: 0.1
-            }}></div>
-
-            <div className="container-fluid h-100 position-relative">
-                <div className="row justify-content-center align-items-center" style={{ minHeight: '100vh' }}>
-                    <div className="col-xl-4 col-lg-5 col-md-6 col-sm-8">
-                        {/* Main Login Card */}
-                        <div className="card border-0 shadow-lg position-relative overflow-hidden"
-                            style={{
-                                borderRadius: '24px',
-                                backdropFilter: 'blur(20px)',
-                                background: 'rgba(255, 255, 255, 0.95)',
-                                boxShadow: '0 20px 40px rgba(139, 69, 19, 0.3)'
-                            }}>
-
-                            {/* Header Section */}
-                            <div className="card-header border-0 bg-transparent text-center pt-5 pb-0">
-                                <div className="mb-4">
-                                    <div className="position-relative d-inline-block">
-                                        <div className="bg-white rounded-circle shadow-lg p-3 d-inline-flex align-items-center justify-content-center"
-                                            style={{
-                                                width: '100px',
-                                                height: '100px',
-                                                boxShadow: '0 8px 24px rgba(139, 69, 19, 0.2)'
-                                            }}>
-                                            <img src={Logo} alt="Logo" style={{ maxWidth: '70px', height: 'auto' }} />
-                                        </div>
-                                        <div className="position-absolute top-0 end-0 rounded-circle d-flex align-items-center justify-content-center"
-                                            style={{
-                                                width: '24px',
-                                                height: '24px',
-                                                transform: 'translate(8px, -8px)',
-                                                background: 'linear-gradient(135deg, #8B4513 0%, #CD853F 100%)'
-                                            }}>
-                                            <i className="bi bi-shield-check text-white" style={{ fontSize: '12px' }}></i>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <h2 className="fw-bold mb-2" style={{
-                                    fontSize: '1.75rem',
-                                    color: '#8B4513'
-                                }}>
-                                    لوحة تحكم Kale Cafe
-                                </h2>
-                                <p className="text-muted mb-0" style={{ fontSize: '0.95rem' }}>
-                                    قم بتسجيل الدخول للوصول إلى نظام الإدارة
-                                </p>
-                            </div>
-
-                            <div className="card-body px-5 pb-5">
-                                <form onSubmit={handleSubmit}>
-                                    <div className="mb-4">
-                                        <label htmlFor="username" className="form-label fw-semibold text-dark mb-2">
-                                            <i className="bi bi-person-circle me-2" style={{ color: '#8B4513' }}></i>
-                                            اسم المستخدم أو البريد الإلكتروني
-                                        </label>
-                                        <div className="position-relative">
-                                            <input
-                                                id="username"
-                                                name="username"
-                                                type="text"
-                                                value={credentials.username}
-                                                onChange={handleInputChange}
-                                                required
-                                                disabled={isLoading}
-                                                className="form-control form-control-lg border-0 shadow-sm"
-                                                placeholder="أدخل اسم المستخدم أو البريد الإلكتروني"
-                                                style={{
-                                                    borderRadius: '16px',
-                                                    backgroundColor: '#f8f9fa',
-                                                    paddingLeft: '20px',
-                                                    paddingRight: '50px',
-                                                    fontSize: '1rem',
-                                                    border: '2px solid transparent',
-                                                    transition: 'all 0.3s ease'
-                                                }}
-                                                onFocus={(e) => {
-                                                    e.target.style.borderColor = '#CD853F';
-                                                    e.target.style.boxShadow = '0 0 0 3px rgba(205, 133, 63, 0.1)';
-                                                }}
-                                                onBlur={(e) => {
-                                                    e.target.style.borderColor = 'transparent';
-                                                    e.target.style.boxShadow = 'none';
-                                                }}
-                                            />
-                                            <i className="bi bi-person position-absolute"
-                                                style={{
-                                                    left: '16px',
-                                                    top: '50%',
-                                                    transform: 'translateY(-50%)',
-                                                    fontSize: '1.1rem',
-                                                    color: '#8B4513'
-                                                }}></i>
-                                        </div>
-                                    </div>
-
-                                    <div className="mb-4">
-                                        <label htmlFor="password" className="form-label fw-semibold text-dark mb-2">
-                                            <i className="bi bi-shield-lock me-2" style={{ color: '#8B4513' }}></i>
-                                            كلمة المرور
-                                        </label>
-                                        <div className="position-relative">
-                                            <input
-                                                id="password"
-                                                name="password"
-                                                type="password"
-                                                value={credentials.password}
-                                                onChange={handleInputChange}
-                                                required
-                                                disabled={isLoading}
-                                                className="form-control form-control-lg border-0 shadow-sm"
-                                                placeholder="أدخل كلمة المرور"
-                                                style={{
-                                                    borderRadius: '16px',
-                                                    backgroundColor: '#f8f9fa',
-                                                    paddingLeft: '20px',
-                                                    paddingRight: '50px',
-                                                    fontSize: '1rem',
-                                                    border: '2px solid transparent',
-                                                    transition: 'all 0.3s ease'
-                                                }}
-                                                onFocus={(e) => {
-                                                    e.target.style.borderColor = '#CD853F';
-                                                    e.target.style.boxShadow = '0 0 0 3px rgba(205, 133, 63, 0.1)';
-                                                }}
-                                                onBlur={(e) => {
-                                                    e.target.style.borderColor = 'transparent';
-                                                    e.target.style.boxShadow = 'none';
-                                                }}
-                                            />
-                                            <i className="bi bi-lock position-absolute"
-                                                style={{
-                                                    left: '16px',
-                                                    top: '50%',
-                                                    transform: 'translateY(-50%)',
-                                                    fontSize: '1.1rem',
-                                                    color: '#8B4513'
-                                                }}></i>
-                                        </div>
-                                    </div>
-
-                                    <button
-                                        type="submit"
-                                        disabled={isLoading || !credentials.username.trim() || !credentials.password.trim()}
-                                        className="btn btn-lg w-100 fw-bold text-white border-0 shadow-sm position-relative overflow-hidden"
-                                        style={{
-                                            borderRadius: '16px',
-                                            padding: '16px',
-                                            background: 'linear-gradient(135deg, #8B4513 0%, #CD853F 100%)',
-                                            fontSize: '1.1rem',
-                                            transition: 'all 0.3s ease'
-                                        }}
-                                        onMouseEnter={(e) => {
-                                            if (!isLoading) {
-                                                e.target.style.transform = 'translateY(-2px)';
-                                                e.target.style.boxShadow = '0 8px 20px rgba(139, 69, 19, 0.4)';
-                                            }
-                                        }}
-                                        onMouseLeave={(e) => {
-                                            e.target.style.transform = 'translateY(0)';
-                                            e.target.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.1)';
-                                        }}
-                                    >
-                                        {isLoading ? (
-                                            <div className="d-flex align-items-center justify-content-center">
-                                                <div className="spinner-border spinner-border-sm me-2" style={{ width: '18px', height: '18px' }}></div>
-                                                جاري تسجيل الدخول...
-                                            </div>
-                                        ) : (
-                                            <>
-                                                <i className="bi bi-box-arrow-in-right me-2"></i>
-                                                تسجيل الدخول
-                                            </>
-                                        )}
-                                    </button>
-                                </form>
-
-                            </div>
-
-                            {/* Security Notice */}
-                            <div className="mt-4 p-3 rounded-3" style={{ backgroundColor: 'rgba(107, 66, 38, 0.04)' }}>
-                                <div className="d-flex align-items-center">
-                                    <div className="rounded-circle d-flex align-items-center justify-content-center me-3"
-                                        style={{ width: '38px', height: '38px', minWidth: '38px', backgroundColor: 'rgba(107, 66, 38, 0.08)' }}>
-                                        <i className="bi bi-shield-check" style={{ color: '#6B4226' }}></i>
-                                    </div>
-                                    <div>
-                                        <small className="fw-semibold d-block" style={{ color: '#4A2E1A' }}>نظام آمن ومحمي</small>
-                                        <small className="text-muted">للوصول إلى هذا النظام، يجب أن تكون مدير معتمد</small>
-                                    </div>
-                                </div>
-                            </div>
+            <div className="card border-0" style={{
+                width: '100%',
+                maxWidth: '420px',
+                borderRadius: '16px',
+                backgroundColor: '#ffffff',
+                boxShadow: '0 8px 30px rgba(74, 46, 26, 0.08)'
+            }}>
+                <div className="card-body p-4 p-md-5">
+                    <div className="text-center mb-4">
+                        <div className="d-inline-flex align-items-center justify-content-center mb-3" style={{
+                            width: '90px',
+                            height: '90px',
+                            borderRadius: '50%',
+                            backgroundColor: 'rgba(107, 66, 38, 0.05)'
+                        }}>
+                            <img src={Logo} alt="Kale Cafe Logo" style={{ width: '60px' }} />
                         </div>
-
-                        {/* Footer */}
-                        <div className="text-center mt-4">
-                            <small className="text-white-50">
-                                <i className="bi bi-shield-fill-check me-1"></i>
-                                نظام إدارة Kale Cafe - محمي بأعلى معايير الأمان
-                            </small>
-                        </div>
+                        <h4 className="fw-bold mb-1" style={{ color: '#4A2E1A' }}>لوحة تحكم Kale Cafe</h4>
+                        <p className="text-muted" style={{ fontSize: '0.9rem' }}>قم بتسجيل الدخول للوصول إلى نظام الإدارة</p>
                     </div>
+
+                    <form onSubmit={handleSubmit}>
+                        <div className="mb-3 text-start">
+                            <label htmlFor="username" className="form-label fw-semibold mb-1 w-100 text-end" style={{ fontSize: '0.85rem', color: '#6B4226' }}>
+                                اسم المستخدم أو البريد الإلكتروني
+                            </label>
+                            <div className="input-group" dir="ltr">
+                                <input
+                                    id="username"
+                                    name="username"
+                                    type="text"
+                                    value={credentials.username}
+                                    onChange={handleInputChange}
+                                    required
+                                    disabled={isLoading}
+                                    className="form-control border-end-0 bg-light shadow-none text-end"
+                                    placeholder="أدخل اسم المستخدم..."
+                                    style={{ borderColor: 'rgba(107,66,38,0.2)' }}
+                                />
+                                <span className="input-group-text border-start-0 bg-light" style={{ borderColor: 'rgba(107,66,38,0.2)' }}>
+                                    <i className="bi bi-person" style={{ color: '#8B5E3C' }}></i>
+                                </span>
+                            </div>
+                        </div>
+
+                        <div className="mb-4 text-start">
+                            <label htmlFor="password" className="form-label fw-semibold mb-1 w-100 text-end" style={{ fontSize: '0.85rem', color: '#6B4226' }}>
+                                كلمة المرور
+                            </label>
+                            <div className="input-group" dir="ltr">
+                                <input
+                                    id="password"
+                                    name="password"
+                                    type="password"
+                                    value={credentials.password}
+                                    onChange={handleInputChange}
+                                    required
+                                    disabled={isLoading}
+                                    className="form-control border-end-0 bg-light shadow-none text-end"
+                                    placeholder="أدخل كلمة المرور..."
+                                    style={{ borderColor: 'rgba(107,66,38,0.2)' }}
+                                />
+                                <span className="input-group-text border-start-0 bg-light" style={{ borderColor: 'rgba(107,66,38,0.2)' }}>
+                                    <i className="bi bi-lock" style={{ color: '#8B5E3C' }}></i>
+                                </span>
+                            </div>
+                        </div>
+
+                        <button
+                            type="submit"
+                            disabled={isLoading || !credentials.username.trim() || !credentials.password.trim()}
+                            className="btn w-100 text-white fw-bold d-flex justify-content-center align-items-center gap-2 shadow-sm"
+                            style={{
+                                padding: '12px',
+                                borderRadius: '10px',
+                                background: 'linear-gradient(135deg, #6B4226 0%, #CD853F 100%)',
+                                border: 'none',
+                                transition: 'all 0.3s ease',
+                                opacity: (isLoading || !credentials.username.trim() || !credentials.password.trim()) ? 0.7 : 1
+                            }}
+                        >
+                            {isLoading ? (
+                                <>
+                                    <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                    <span>جاري تسجيل الدخول...</span>
+                                </>
+                            ) : (
+                                <>
+                                    <i className="bi bi-box-arrow-in-right"></i>
+                                    <span>تسجيل الدخول</span>
+                                </>
+                            )}
+                        </button>
+                    </form>
                 </div>
+            </div>
+
+            <div className="position-absolute bottom-0 w-100 text-center pb-3">
+                <small style={{ color: '#8B5E3C' }}>
+                    <i className="bi bi-shield-check ms-1"></i>
+                    نظام إدارة Kale Cafe - محمي وآمن
+                </small>
             </div>
         </div>
     );

@@ -24,7 +24,7 @@ import { useAuth } from "./context/AuthContext";
 // Redirects employees to /tables, allows other roles through
 const AdminRoute = ({ children }) => {
   const { user } = useAuth();
-  if (user?.role === 'staff') {
+  if (user?.role === 'employee') {
     return <Navigate to="/tables" replace />;
   }
   return children;
