@@ -17,7 +17,7 @@ const TablesPage = () => {
     const [showOrderModal, setShowOrderModal] = useState(false);
     const [viewingOrder, setViewingOrder] = useState(null);
     const { user } = useAuth();
-    const isStaff = user?.role === 'staff';
+    const isAdmin = user?.role === 'admin';
 
     const confirm = useConfirm();
 
@@ -707,7 +707,7 @@ const TablesPage = () => {
                                 <i className="bi bi-bicycle me-2"></i>
                                 طلب سفري
                             </button>
-                            {!isStaff && (
+                            {isAdmin && (
                                 <button
                                     onClick={() => setShowAddTable(true)}
                                     className="btn text-white px-4 d-flex gap-1"
@@ -809,7 +809,7 @@ const TablesPage = () => {
                                                             </div>
                                                         )}
 
-                                                        {!isStaff && (
+                                                        {isAdmin && (
                                                             <div className="d-flex justify-content-center gap-2 mt-auto pt-1">
                                                                 <button className="btn btn-sm d-flex align-items-center justify-content-center"
                                                                     style={{
@@ -940,7 +940,7 @@ const TablesPage = () => {
                                                                 disabled={isLoading}>
                                                                 <i className="bi bi-check-lg"></i>إكمال
                                                             </button>
-                                                            {!isStaff && (
+                                                            {isAdmin && (
                                                                 <button className="btn btn-sm btn-outline-danger d-flex align-items-center gap-1"
                                                                     style={{ fontSize: '0.75rem' }}
                                                                     onClick={() => handleOrderStatus(order._id, 'cancelled')}
@@ -1559,7 +1559,7 @@ const TablesPage = () => {
                                                                                 onClick={() => handleOrderStatus(order._id, 'completed', paymentMethod)}>
                                                                                 <i className="bi bi-check-lg"></i>
                                                                             </button>
-                                                                            {!isStaff && (
+                                                                            {isAdmin && (
                                                                                 <>
                                                                                     <button className="btn btn-sm btn-outline-danger"
                                                                                         style={{ fontSize: '0.65rem', padding: '1px 6px' }}
